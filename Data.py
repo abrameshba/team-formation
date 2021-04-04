@@ -32,9 +32,9 @@ def make_reocrds_file(t_name):
     collaborations_dict = dict()
     author_id = 1
     import utilities
-    with open("../dblp-2020/" + t_name + ".txt") as file:
-        n_lines = get_num_lines("../dblp-2020/" + t_name + ".txt")
-        open("../dblp-2020/" + t_name + "-rec.txt", "w").close()
+    with open("../dblp-2015/" + t_name + ".txt") as file:
+        n_lines = get_num_lines("../dblp-2015/" + t_name + ".txt")
+        open("../dblp-2015/" + t_name + "-rec.txt", "w").close()
         for line in tqdm(file, total=n_lines):
             year = ""
             if "<year>" in line:
@@ -100,24 +100,24 @@ def make_reocrds_file(t_name):
                 journal = line[line.index("<booktitle>") + len("<booktitle>"):line.index("</booktitle>")]
             else:
                 pass
-            if len(year) > 0 and len(authors) > 0 and len(title) > 0 and len(journal) > 0:
+            if len(year) > 0 and int(year) > 1999 and len(authors) > 0 and len(title) > 0 and len(journal) > 0:
                 record = year
                 record += "\t" + journal
                 record += "\t" + ":".join(authors)
                 record += "\t" + title + "\n"
-                open("../dblp-2020/" + t_name + "-rec.txt", "a").write(record)
+                open("../dblp-2015/" + t_name + "-rec.txt", "a").write(record)
     import os
-    open("../dblp-2020/" + t_name + "-records.txt", "w").close()
-    os.system('sort ../dblp-2020/' + t_name + '-rec.txt > ../dblp-2020/' + t_name + '-records.txt')
-    os.system('rm -v ../dblp-2020/' + t_name + '-rec.txt')
-    open("../dblp-2020/" + t_name + "-authors.txt", "w").close()
+    open("../dblp-2015/" + t_name + "-records.txt", "w").close()
+    os.system('sort ../dblp-2015/' + t_name + '-rec.txt > ../dblp-2015/' + t_name + '-records.txt')
+    os.system('rm -v ../dblp-2015/' + t_name + '-rec.txt')
+    open("../dblp-2015/" + t_name + "-authors.txt", "w").close()
     for aid in authors_dict.keys():
-        open("../dblp-2020/" + t_name + "-authors.txt", "a").write(str(aid) + "\t" + authors_dict[aid] + "\n")
-    open("../dblp-2020/" + t_name + "-authors-publications.txt", "w").close()
-    open("../dblp-2020/" + t_name + "-authors-skills.txt", "w").close()
+        open("../dblp-2015/" + t_name + "-authors.txt", "a").write(str(aid) + "\t" + authors_dict[aid] + "\n")
+    open("../dblp-2015/" + t_name + "-authors-publications.txt", "w").close()
+    open("../dblp-2015/" + t_name + "-authors-skills.txt", "w").close()
     skills_set = set()
     for aid in authors_publications_dict.keys():
-        open("../dblp-2020/" + t_name + "-authors-publications.txt", "a").write(
+        open("../dblp-2015/" + t_name + "-authors-publications.txt", "a").write(
             str(aid) + "\t" + " ".join(authors_publications_dict[aid]) + "\n")
         skills = utilities.get_skills(" ".join(authors_publications_dict[aid]))
         for skl in skills:
@@ -129,19 +129,19 @@ def make_reocrds_file(t_name):
         skills_dict[skill] = skill_id
         skills_id_dict[skill_id] = skill
         skill_id += 1
-    open("../dblp-2020/" + t_name + "-skills.txt", "w").close()
+    open("../dblp-2015/" + t_name + "-skills.txt", "w").close()
     for sid in skills_id_dict.keys():
-        open("../dblp-2020/" + t_name + "-skills.txt", "a").write(str(sid) + "\t" + str(skills_id_dict[sid]) + "\n")
+        open("../dblp-2015/" + t_name + "-skills.txt", "a").write(str(sid) + "\t" + str(skills_id_dict[sid]) + "\n")
     for aid in authors_publications_dict.keys():
         expert_skills = utilities.get_skills(" ".join(authors_publications_dict[aid]))  # skill names
         skills = [str(skills_dict[skill]) for skill in expert_skills]  # skill ids
-        if len(skills) > 0:  # expert with at least two skills
+        if len(skills) > 1:  # expert with at least two skills
             authors_skills_dict[aid] = skills
-            open("../dblp-2020/" + t_name + "-authors-skills.txt", "a").write(str(aid) + "\t" + ",".join(skills) + "\n")
-    open("../dblp-2020/" + t_name + "-authors-pair.txt", "w").close()
+            open("../dblp-2015/" + t_name + "-authors-skills.txt", "a").write(str(aid) + "\t" + ",".join(skills) + "\n")
+    open("../dblp-2015/" + t_name + "-authors-pair.txt", "w").close()
     for pair in collaborations_dict:
         if len(collaborations_dict[pair]) > 1:  # authors pair with at least two collaborations
-            open("../dblp-2020/" + t_name + "-authors-pair.txt", "a").write(
+            open("../dblp-2015/" + t_name + "-authors-pair.txt", "a").write(
                 str(pair) + "\t" + str(len(collaborations_dict[pair])) + "\n")
     import networkx as nx
     graph = nx.Graph()
@@ -156,7 +156,7 @@ def make_reocrds_file(t_name):
         jd = 1 - (len(collaborations_dict[pair]) / denominator)
         graph.add_edge(int(pair.split(":")[0]), int(pair.split(":")[1]), weight=jd)
     largest_cc = nx.subgraph(graph, max(nx.connected_components(graph), key=len)).copy()
-    nx.write_gml(largest_cc, "../dblp-2020/" + t_name + ".gml")
+    nx.write_gml(largest_cc, "../dblp-2015/j" + t_name + ".gml")
 
 
 def multiprocessing_func(l_txt):
@@ -166,8 +166,7 @@ def multiprocessing_func(l_txt):
 if __name__ == '__main__':
     starttime = time.time()
     processes = []
-    #for txt in ["vldb", "articles", "inproceedings"]:
-    for txt in ["vldb"]:
+    for txt in ["dblp"]:
         p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
         processes.append(p)
         p.start()

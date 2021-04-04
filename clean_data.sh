@@ -7,7 +7,6 @@ year=2020
 rm -v ./"dblp-"$year/*.txt
 
 
-
 # extracting the .xml.gz file
 gunzip -k ./"dblp-"$year/"dblp-"$year"-04-01.xml.gz"
 
@@ -42,4 +41,35 @@ rm -v ./"dblp-"$year/it3.txt
 grep -v 'publtype=\"withdrawn\"' ./"dblp-"$year/it4.txt | sed 's/<\/author>[[:space:]]*<author>/:/g' | sed '/^[[:space:]]*$/d' > ./"dblp-"$year/inproceedings.txt
 rm -v ./"dblp-"$year/it4.txt
 
+cat ./"dblp-"$year/articles.txt >> ./"dblp-"$year/"dblp".txt
+cat ./"dblp-"$year/inproceedings.txt >> ./"dblp-"$year/"dblp".txt
 
+rm -v  ./"dblp-"$year/articles.txt  ./"dblp-"$year/inproceedings.txt
+
+communities=(sigmod vldb icde icdt edbt pods)
+for community in "${communities[@]}"
+do
+    grep -iw $community ./"dblp-"$year/"dblp".txt > ./"dblp-"$year/$community.txt
+    cat ./"dblp-"$year/$community.txt >> ./"dblp-"$year/"db".txt
+done
+
+communities=(www kdd sdm pkdd icdm)
+for community in "${communities[@]}"
+do
+    grep -iw $community ./"dblp-"$year/"dblp".txt > ./"dblp-"$year/$community.txt
+    cat ./"dblp-"$year/$community.txt >> ./"dblp-"$year/"dm".txt
+done
+
+communities=(icml ecml colt uai)
+for community in "${communities[@]}"
+do
+    grep -iw $community ./"dblp-"$year/"dblp".txt > ./"dblp-"$year/$community.txt
+    cat ./"dblp-"$year/$community.txt >> ./"dblp-"$year/"ai".txt
+done
+
+communities=(soda focs stoc stacs)
+for community in "${communities[@]}"
+do
+    grep -iw $community ./"dblp-"$year/"dblp".txt > ./"dblp-"$year/$community.txt
+    cat ./"dblp-"$year/$community.txt >> ./"dblp-"$year/"th".txt
+done
