@@ -166,7 +166,7 @@ def multiprocessing_func(l_txt):
 if __name__ == '__main__':
     starttime = time.time()
     processes = []
-    #for txt in ["articles", "inproceedings"]:
+    #for txt in ["vldb", "articles", "inproceedings"]:
     for txt in ["vldb"]:
         p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
         processes.append(p)
