@@ -132,3 +132,8 @@ dmypy.json
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/team-formation.iml
 /.idea/vcs.xml
+/__init__.py
+/classes.dot
+/packages.dot
+/tfp_classes.png
+/tfp_packages.png
