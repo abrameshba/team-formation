@@ -10,6 +10,8 @@ class Team:
         """ Return str(self). """
         # if self.cardinality()==0:
         self.record = ""
+        if len(self.experts) == 0:
+            self.record = "Team Not Yet Formed"
         for expert in self.experts:
             self.record += " " + expert + ":" + ",".join(self.skills[expert])
         return self.record
@@ -126,7 +128,7 @@ if __name__ == "__main__":
     team = Team()
     import sys
 
-    print("sizeof " + str(team.__sizeof__()))
-    print("sizeof with overhead " + str(sys.getsizeof(team)))
+    print("memory required in bytes : " + str(team.__sizeof__()))                       #   sizeof
+    print("memory required in bytes with overhead : " + str(sys.getsizeof(team)))       #   sizeof with overhead
     print("string " + team.__str__())
     print("cardinality " + str(team.cardinality()))
