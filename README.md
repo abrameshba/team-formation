@@ -1,2 +1,1 @@
-# team-formation
-team formation algorithms implemented in python 
+This repository contains Python implementation of team formation algorithms that were introduced in the last decade
