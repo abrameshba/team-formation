@@ -23,11 +23,11 @@ if __name__ == '__main__':
     import networkx as nx
     from Team import Team
 
-    graph = nx.read_gml("/home/cilab/paper-1/network1.gml")
+    graph = nx.read_gml("/home/cilab/paper-1/network.gml")
     # open("../dblp-2020/vldb-17-tasks-1-rf-stats.txt", "w").close()
     task = ["A", "B", "C", "D"]
     record = ""
-    team = Algorithms.best_sum_distance(graph, task)
+    team = Algorithms.tfc(graph, task)
     record += str(len(task))
     record += "\t" + str(team.cardinality())
     record += "\t" + str(team.radius(graph))
@@ -35,6 +35,7 @@ if __name__ == '__main__':
     record += "\t" + str(round(team.leader_distance(graph), 2))
     record += "\t" + str(round(team.leader_skill_distance(graph, task), 2))
     record += "\t" + str(round(team.sum_distance(graph, task), 2))
+    print()
     print(team)
     # record += "\t" + str(format(team.shannon_diversity(team, task), "1.2f"))
     # record += "\t" + str(format(team.simpson_density(team, task), "1.2f"))

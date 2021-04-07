@@ -46,8 +46,9 @@ def rarestfirst(l_graph, l_task):
                             team.skills[closest_expert].append(l_skill)
                         else:
                             team.skills[closest_expert].append(l_skill)
-            team_graph = utilities.get_team_subgraph(l_graph, team)
-            dd = measurements.diameter_team(team_graph)
+            team_graph = team.get_team_graph(l_graph)
+            dd = team.diameter(team_graph)
+            print(team)
             if dd is not None:
                 if min_dd > dd:
                     min_dd = dd
@@ -96,7 +97,8 @@ def best_sum_distance(l_graph, l_task):
                             team.skills[closest_expert].append(skill_j)
                         else:
                             team.skills[closest_expert].append(skill_j)
-            sum_dist = measurements.sum_distance_team(l_graph, l_task, team)
+            sum_dist = team.sum_distance(l_graph, l_task)
+            print(team)
             if sum_dist < least_sum_distance:
                 least_sum_distance = sum_dist
                 best_team = team
@@ -118,7 +120,7 @@ def tfs(l_graph, l_task):  # twice of average degree
     # rds = nx.radius(l_graph)
     avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
     hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
-                 d >= 2 * avg_degree and
+                 d >= avg_degree and
                  len(set(l_graph.nodes[n]["skills"].split(",")).intersection(set(l_task))) > 0],
                 reverse=True)
     best_team = Team()
@@ -127,6 +129,7 @@ def tfs(l_graph, l_task):  # twice of average degree
     expert_skills = utilities.get_expert_skills_dict(l_graph)
     skill_experts = utilities.get_skill_experts_dict(l_graph)
     random_expert_added = 0
+    print(hc)
     for c_node in hc:
         task_copy = l_task[:]
         hops = 1
@@ -201,7 +204,7 @@ def tfs(l_graph, l_task):  # twice of average degree
             continue
         elif len(task_copy) == 0:
             # print(i, team)
-            ld = measurements.leader_distance_team(l_graph, team, team.leader)
+            ld = team.leader_distance(l_graph)
             if best_ldr_distance > ld:
                 best_ldr_distance = ld
                 best_team = team
@@ -225,7 +228,7 @@ def tfc(l_graph, l_task):  # twice of average degree
     # rds = nx.radius(l_graph)
     avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
     hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
-                 d >= 2 * avg_degree and
+                 d >= avg_degree and
                  len(set(l_graph.nodes[n]["skills"].split(",")).intersection(set(l_task))) > 0],
                 reverse=True)
     best_team = Team()
@@ -234,6 +237,7 @@ def tfc(l_graph, l_task):  # twice of average degree
     expert_skills = utilities.get_expert_skills_dict(l_graph)
     skill_experts = utilities.get_skill_experts_dict(l_graph)
     random_expert_added = 0
+    print(hc)
     for c_node in hc:
         task_copy = l_task[:]
         hops = 1
@@ -301,7 +305,7 @@ def tfc(l_graph, l_task):  # twice of average degree
             continue
         elif len(task_copy) == 0:
             # print(i, team)
-            ld = measurements.leader_distance_team(l_graph, team, team.leader)
+            ld = team.leader_distance(l_graph)
             if best_ldr_distance > ld:
                 best_ldr_distance = ld
                 best_team = team
@@ -319,14 +323,25 @@ def best_leader_distance(l_graph, l_task):
     """
     import utilities
     import measurements
+    import networkx as nx
     from Team import Team
     l_skill_expert = utilities.get_skill_experts_dict(l_graph)
-    least_ldr_distance = 1000
+    ldr_distance = 1000
     best_team = Team()
     for candidate in nx.nodes(l_graph):
         team = Team()
         team.leader = candidate
-        for skill in l_task:
+        team.experts.add(candidate)
+        skill_cover = set(l_task).intersection(
+            set(l_graph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
+        for skill in skill_cover:
+            if candidate not in team.skills:
+                team.skills[candidate] = list()
+                team.skills[candidate].append(skill)
+            else:
+                team.skills[candidate].append(skill)
+        r_skills = set(l_task).difference(skill_cover)
+        for skill in r_skills:
             min_dis = 100
             closest_expert = ""
             for expert in l_skill_expert[skill]:
@@ -342,12 +357,10 @@ def best_leader_distance(l_graph, l_task):
                     team.skills[closest_expert].append(skill)
                 else:
                     team.skills[closest_expert].append(skill)
-        if least_ldr_distance == 1000:
-            ldr_dist = measurements.leader_skill_distance_team(l_graph, team, candidate, l_task)
-        else:
-            ldr_dist = measurements.leader_skill_distance_team(l_graph, team, candidate, l_task)
-        if ldr_dist < least_ldr_distance:
-            least_ldr_distance = ldr_dist
+        print(team)
+        cld = team.leader_skill_distance(l_graph, l_task)
+        if ldr_distance > cld:
+            ldr_distance = cld
             best_team = team
     return best_team
 

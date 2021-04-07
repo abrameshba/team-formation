@@ -211,29 +211,29 @@ def make_community_reocrds_file(t_name):
                     for collaborator_1 in authors:
                         for collaborator_2 in authors:
                             if collaborator_1 != collaborator_2:
-                                if str(authors_id_dict[collaborator_1]) + ":" + str(
-                                        authors_id_dict[collaborator_2]) in collaborations_dict:
+                                if str(authors_dict[collaborator_1]) + ":" + str(
+                                        authors_dict[collaborator_2]) in collaborations_dict:
                                     if title not in collaborations_dict[
-                                        str(authors_id_dict[collaborator_1]) + ":" + str(
-                                            authors_id_dict[collaborator_2])]:
-                                        collaborations_dict[str(authors_id_dict[collaborator_1]) + ":" + str(
-                                            authors_id_dict[collaborator_2])].append(title)
+                                        str(authors_dict[collaborator_1]) + ":" + str(
+                                            authors_dict[collaborator_2])]:
+                                        collaborations_dict[str(authors_dict[collaborator_1]) + ":" + str(
+                                            authors_dict[collaborator_2])].append(title)
                                     else:
                                         pass
-                                elif str(authors_id_dict[collaborator_2]) + ":" + str(
-                                        authors_id_dict[collaborator_1]) in collaborations_dict:
+                                elif str(authors_dict[collaborator_2]) + ":" + str(
+                                        authors_dict[collaborator_1]) in collaborations_dict:
                                     if title not in collaborations_dict[
-                                        str(authors_id_dict[collaborator_2]) + ":" + str(
-                                            authors_id_dict[collaborator_1])]:
-                                        collaborations_dict[str(authors_id_dict[collaborator_2]) + ":" + str(
-                                            authors_id_dict[collaborator_1])].append(title)
+                                        str(authors_dict[collaborator_2]) + ":" + str(
+                                            authors_dict[collaborator_1])]:
+                                        collaborations_dict[str(authors_dict[collaborator_2]) + ":" + str(
+                                            authors_dict[collaborator_1])].append(title)
                                     else:
                                         pass
                                 else:
-                                    collaborations_dict[str(authors_id_dict[collaborator_2]) + ":" + str(
-                                        authors_id_dict[collaborator_1])] = list()
-                                    collaborations_dict[str(authors_id_dict[collaborator_2]) + ":" + str(
-                                        authors_id_dict[collaborator_1])].append(title)
+                                    collaborations_dict[str(authors_dict[collaborator_2]) + ":" + str(
+                                        authors_dict[collaborator_1])] = list()
+                                    collaborations_dict[str(authors_dict[collaborator_2]) + ":" + str(
+                                        authors_dict[collaborator_1])].append(title)
             else:
                 pass
             journal = ""

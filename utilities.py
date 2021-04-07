@@ -13,7 +13,7 @@ def get_skills(publication) -> list:
     filtered_words = list()
     skills = set()
     for word in all_words:
-        if word not in stopwords.words('english') and len(word) > 2:
+        if word not in stopwords.words('english') and len(word) > 2 :
             filtered_words.append(word.lower())
     local_dict = list_to_freq(filtered_words)
     for word, freq in local_dict.items():
