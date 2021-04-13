@@ -8,14 +8,12 @@ def get_skills(publication) -> list:
     """
     from nltk import word_tokenize
     import re
-    from nltk.corpus import brown
     from nltk.corpus import stopwords
     all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
     filtered_words = list()
     skills = set()
+    from nltk.corpus import brown
     setofwords = set(brown.words())
-    # from nltk.corpus import brown
-    # setofwords = set(brown.words())
     for word in all_words:
         if word.lower() not in stopwords.words('english') and len(word) > 2 and word.lower() in setofwords:
             filtered_words.append(word.lower())
@@ -223,3 +221,16 @@ def get_num_lines(file_path):
     while buf.readline():
         lines += 1
     return lines
+
+
+# function to return key for any value
+def get_key(my_dict, val):
+    for key, value in my_dict.items():
+        if val == value:
+            return key
+
+def remove_numbers_symbols(instring):
+    import re
+    result1 = re.sub(r'[^\w]', ' ', instring)
+    result = ''.join([i for i in result1 if not i.isdigit()])
+    return result
