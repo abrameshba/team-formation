@@ -8,16 +8,45 @@ def get_skills(publication) -> list:
     """
     from nltk import word_tokenize
     import re
+    from nltk.corpus import brown
     from nltk.corpus import stopwords
     all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
     filtered_words = list()
     skills = set()
+    setofwords = set(brown.words())
+    # from nltk.corpus import brown
+    # setofwords = set(brown.words())
     for word in all_words:
-        if word not in stopwords.words('english') and len(word) > 2 and word in words.word():
+        if word.lower() not in stopwords.words('english') and len(word) > 2 and word.lower() in setofwords:
             filtered_words.append(word.lower())
     local_dict = list_to_freq(filtered_words)
     for word, freq in local_dict.items():
         if freq > 1:  # check non trivial words that appear at least twice
+            skills.add(word.lower())
+    lst = list(skills)
+    return sorted(lst)
+
+
+def get_cmnt_skills(publication) -> list:
+    """
+    returns non trivial words of publication as skills packed in set
+    used to get skills of an expert
+    non trivial keywords that appear at least twice in his/her publications are skills
+    :param publication:
+    :return:
+    """
+    from nltk import word_tokenize
+    import re
+    all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
+    skills = set()
+    dblp_skills = set()
+    import networkx as nx
+    graph = nx.read_gml("../dblp-2015/jdblp.gml")
+    for node in graph.nodes():
+        for skill in graph.nodes[node]["skills"]:
+            dblp_skills.add(skill)
+    for word in all_words:
+        if word.lower() in dblp_skills:
             skills.add(word.lower())
     lst = list(skills)
     return sorted(lst)
@@ -184,3 +213,13 @@ def get_expert_skills_dict(graph):
         if len(graph.nodes[node]) > 0:
             expert_skills[node] = graph.nodes[node]["skills"].split(",")
     return expert_skills
+
+# ref : https://blog.nelsonliu.me/2016/07/30/progress-bars-for-python-file-reading-with-tqdm/
+def get_num_lines(file_path):
+    fp = open(file_path, "r+")
+    import mmap
+    buf = mmap.mmap(fp.fileno(), 0)
+    lines = 0
+    while buf.readline():
+        lines += 1
+    return lines

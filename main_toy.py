@@ -23,7 +23,7 @@ if __name__ == '__main__':
     import networkx as nx
     from Team import Team
 
-    graph = nx.read_gml("/home/cilab/paper-1/network.gml")
+    graph = nx.read_gml("/home/cilab/revised-eswa/network.gml")
     # open("../dblp-2020/vldb-17-tasks-1-rf-stats.txt", "w").close()
     task = ["A", "B", "C", "D"]
     record = ""
