@@ -22,7 +22,7 @@ class DBLP_Data:
         authors_name_set = set()
         with open("../dblp-" + self.year + "/icdt.txt") as file:
             n_lines = utilities.get_num_lines("../dblp-" + self.year + "/icdt.txt")
-            print("processing ../dblp-" + self.year + "/icdt.txt - writing authors info ")
+            print("processing ../dblp-" + self.year + "/icdt.txt - authors info ")
             for line in tqdm(file, total=n_lines):
                 if "<author>" in line:
                     authors = line[line.index("<author>") + len("<author>"):line.index("</author>")].split(":")
@@ -35,7 +35,8 @@ class DBLP_Data:
         author_id_name_dict = dict()
         author_name_id_dict = dict()
         open("../dblp-" + self.year + "/icdt-authors.txt", "w").close()
-        for author in authors_name_set:
+        print("writing ../dblp-" + self.year + "/icdt-authors.txt -  authors info ")
+        for author in tqdm(authors_name_set, total=len(authors_name_set)):
             author_id_name_dict[author_id] = author
             author_name_id_dict[author] = author_id
             open("../dblp-" + self.year + "/icdt-authors.txt", "a").write(str(author_id) + "\t" + author + "\n")
@@ -46,7 +47,7 @@ class DBLP_Data:
         titles_set = set()
         with open("../dblp-" + self.year + "/icdt.txt") as file:
             n_lines = utilities.get_num_lines("../dblp-" + self.year + "/icdt.txt")
-            print("processing ../dblp-" + self.year + "/icdt.txt - writing titles info ")
+            print("processing ../dblp-" + self.year + "/icdt.txt - titles info ")
             for line in tqdm(file, total=n_lines):
                 if "<title>" in line:
                     title = line[line.index("<title>") + len("<title>"):line.index("</title>") - 1]
@@ -56,8 +57,9 @@ class DBLP_Data:
                         pass
         title_id = 1
         title_id_name_dict = dict()
+        print("writing ../dblp-" + self.year + "/icdt-titles.txt -  titles info ")
         open("../dblp-" + self.year + "/icdt-titles.txt", "w").close()
-        for title in titles_set:
+        for title in tqdm(titles_set, total=len(titles_set)):
             title_id_name_dict[title_id] = title
             open("../dblp-" + self.year + "/icdt-titles.txt", "a").write(str(title_id) + "\t" + title + "\n")
             title_id += 1
@@ -161,12 +163,12 @@ class DBLP_Data:
                     record += "\t" + ":".join(authors)
                     record += "\t" + title + "\n"
                     open("../dblp-" + self.year + "/icdt-rec.txt", "a").write(record)
-        print("processing ../dblp-" + self.year + "/icdt.txt - writing author collaborations info ")
+        print("writing ../dblp-" + self.year + "/icdt.txt -  author collaborations info ")
         open("../dblp-" + self.year + "/icdt-author-pair-collaborations.txt", "w").close()
         for collab in tqdm(collaborations_dict, total=len(collaborations_dict)):
             open("../dblp-" + self.year + "/icdt-author-pair-collaborations.txt", "a").write(
                 str(collab) + "\t" + ",".join(collaborations_dict[collab]) + "\n")
-        print("processing ../dblp-" + self.year + "/icdt.txt - writing author publications info ")
+        print("writing ../dblp-" + self.year + "/icdt.txt - writing author publications info ")
         open("../dblp-" + self.year + "/icdt-author-publications.txt", "w").close()
         for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
             open("../dblp-" + self.year + "/icdt-author-publications.txt", "a").write(
@@ -176,32 +178,33 @@ class DBLP_Data:
         os.system("sort ../dblp-" + self.year + "/icdt-rec.txt > ../dblp-" + self.year + "/icdt-records.txt")
         os.system("rm -v ../dblp-" + self.year + "/icdt-rec.txt >> /dev/null")
         skill_set = set()
-        # for author in author_id_pubs_dict:
+        author_id_skills_dict = dict()
         for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
             pub_s = ""
+            author_id_skills_dict[author] = list()
             for pub in author_id_pubs_dict[author]:
                 pub_s += " " + title_id_name_dict[pub]
             for skill in utilities.get_skills(pub_s):
                 skill_set.add(skill)
+                author_id_skills_dict[author].append(skill)
         skill_id = 1
         skill_id_name_dict = dict()
+        skill_name_id_dict = dict()
         open("../dblp-" + self.year + "/icdt-skills.txt", "w").close()
         for skill in skill_set:
             skill_id_name_dict[skill_id] = skill
+            skill_name_id_dict[skill] = skill_id
             open("../dblp-" + self.year + "/icdt-skills.txt", "a").write(str(skill_id) + "\t" + skill + "\n")
             skill_id += 1
-        print("processing ../dblp-" + self.year + "/icdt.txt - writing author skills info ")
+        print("writing ../dblp-" + self.year + "/icdt.txt - writing author skills info ")
         open("../dblp-" + self.year + "/icdt-author-skills.txt", "w").close()
-        for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
+        for author in tqdm(author_id_skills_dict, total=len(author_id_skills_dict)):
             author_id_skill_ids_dict[author] = list()
-            pub_s = ""
-            for pub in author_id_pubs_dict[author]:
-                pub_s += " " + title_id_name_dict[pub]
-            for skill in utilities.get_skills(pub_s):
-                author_id_skill_ids_dict[author].append(skill)
-                if len(author_id_skill_ids_dict[author]) > 0:
-                    open("../dblp-" + self.year + "/icdt-author-skills.txt", "a").write(
-                        str(author) + "\t" + ",".join(author_id_skill_ids_dict[author]) + "\n")
+            for skill in author_id_skills_dict[author]:
+                author_id_skill_ids_dict[author].append(skill_name_id_dict[skill])
+            if len(author_id_skill_ids_dict[author]) > 0:
+                open("../dblp-" + self.year + "/icdt-author-skills.txt", "a").write(
+                    str(author) + "\t" + ",".join([str(intg) for intg in author_id_skill_ids_dict[author]]) + "\n")
 
 
 # def make_community_reocrds_file(t_name):

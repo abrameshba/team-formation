@@ -15,11 +15,11 @@ def get_skills(publication) -> list:
     from nltk.corpus import brown
     setofwords = set(brown.words())
     for word in all_words:
-        if word.lower() not in stopwords.words('english') and len(word) > 2 and word.lower() in setofwords:
+        if word.lower() not in stopwords.words('english') and len(word) > 2:
             filtered_words.append(word.lower())
     local_dict = list_to_freq(filtered_words)
     for word, freq in local_dict.items():
-        if freq > 1:  # check non trivial words that appear at least twice
+        if freq > 1 and word in setofwords:  # check non trivial words that appear at least twice
             skills.add(word.lower())
     lst = list(skills)
     return sorted(lst)
