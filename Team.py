@@ -5,7 +5,6 @@ class Team:
         self.skills = dict()
         self.record = ""
         self.leader = ""
-        self.close_experts = set()
 
     def __str__(self):  # real signature unknown
         """ Return str(self). """
@@ -50,7 +49,7 @@ class Team:
         else:
             sp = dict()
             for nd in t_graph.nodes:
-                sp[nd] = nx.single_source_dijkstra_path_length(t_graph,nd)
+                sp[nd] = nx.single_source_dijkstra_path_length(t_graph, nd)
             e = nx.eccentricity(t_graph, sp=sp)
             return nx.diameter(t_graph, e)
 
@@ -67,7 +66,7 @@ class Team:
         else:
             sp = dict()
             for nd in t_graph.nodes:
-                sp[nd] = nx.single_source_dijkstra_path_length(t_graph,nd)
+                sp[nd] = nx.single_source_dijkstra_path_length(t_graph, nd)
             e = nx.eccentricity(t_graph, sp=sp)
             return nx.radius(t_graph, e)
 
@@ -133,12 +132,80 @@ class Team:
                         ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="weight")
         return ld
 
+    def shannon_diversity(self, l_graph):
+        """
+        returns Shannon entropy
+        :param l_graph:
+        :return:
+        """
+        import math
+        shannon_sum = 0
+        task = set()
+        for expert in self.skills:
+            for skill in self.skills[expert]:
+                task.add(skill)
+        for skill in task:
+            cn = 0
+            for node in self.experts:
+                if skill in l_graph.nodes[node]["skills"].split(","):
+                    cn += 1
+            prob = 1-(cn / len(self.experts))
+            shannon_sum += (prob * math.log(prob))
+        # shannon_sum = 0
+        # tot_skls = set()
+        # for node in self.experts:
+        #     tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
+        # for skill in tot_skls:
+        #     cn = 0
+        #     for node in self.experts:
+        #         if skill in l_graph.nodes[node]["skills"].split(","):
+        #             cn += 1
+        #     prob = cn / len(self.experts)
+        #     shannon_sum += prob * math.log(prob)
+        return (-1 * shannon_sum)/4
+
+    def simpson_density(self, l_graph):
+        """
+        calculates reciprocal simpson diversity
+        :return:
+        """
+        simpson_sum = 0
+        task = set()
+        for expert in self.skills:
+            for skill in self.skills[expert]:
+                task.add(skill)
+        for skill in task:
+            cn = 0
+            for node in self.experts:
+                if skill in l_graph.nodes[node]["skills"].split(","):
+                    cn += 1
+            prob = 1-(cn / len(self.experts))
+            simpson_sum += pow(prob, 2)
+        # simpson_sum = 0
+        # tot_skls = set()
+        # for node in self.experts:
+        #     tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
+        # for skill in tot_skls:
+        #     cn = 0
+        #     for node in self.experts:
+        #         if skill in l_graph.nodes[node]["skills"].split(","):
+        #             cn += 1
+        #     prob = cn / len(self.experts)
+        #     simpson_sum += pow(prob, 2)
+        return simpson_sum/4
+
+    def simpson_diversity(self, l_graph):
+        return 1 / (self.simpson_density(l_graph))
+
+    def gini_simpson_diversity(self, l_graph):
+        return 1 - self.simpson_density(l_graph)
+
 
 if __name__ == "__main__":
     team = Team()
     import sys
 
-    print("memory required in bytes : " + str(team.__sizeof__()))                       #   sizeof
-    print("memory required in bytes with overhead : " + str(sys.getsizeof(team)))       #   sizeof with overhead
+    print("memory required in bytes : " + str(team.__sizeof__()))  # sizeof
+    print("memory required in bytes with overhead : " + str(sys.getsizeof(team)))  # sizeof with overhead
     print("string " + team.__str__())
     print("cardinality " + str(team.cardinality()))

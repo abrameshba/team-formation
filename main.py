@@ -4,8 +4,8 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
 # import make_data_file
-import utilities
-import measurements
+# import utilities
+# import measurements
 
 
 def print_hi(name):
@@ -15,40 +15,25 @@ def print_hi(name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    # #print_hi('PyCharm')
-    # make_data_file.make_data_file("vldb")
-    # for cnt in range(0, 5):
-    #     utilities.generate_community_tasks("vldb", 17)
-    #     utilities.generate_community_tasks("vldb", 1700)
+    print_hi('PyCharm')
     import networkx as nx
-    from Team import Team
+    # from Team import Team
+    import Algorithms
 
-    graph = nx.read_gml("../dblp-2020/vldb.gml")
-    # open("../dblp-2020/vldb-17-tasks-1-rf-stats.txt", "w").close()
-    with open("../dblp-2020/vldb-17-tasks-4-teams-tfs.txt", "r") as file:
-        # print("task_size\tteam_size\tradius\tdiameter\tld\tlsd\tsd\shndiv\tsimpdiv\tginidiv\n")
+    graph = nx.read_gml("../dblp-2015/sigmod.gml")
+    with open("../dblp-2015/sigmod-17-tasks-0.txt", "r") as file:
         for line in file:
-            task = list()
-            spw = line.strip("\n").split("\t")
-            team = Team()
-            team.leader = spw[0]
-            team_str = spw[1].strip(" ").split(" ")
-            for mmbr in team_str:
-                expert = mmbr.split(":")[0]
-                skills = mmbr.split(":")[1].split(",")
-                team.experts.add(expert)
-                team.skills[expert] = list()
-                for skill in skills:
-                    team.skills[expert].append(skill)
-                    task.append(skill)
+            task = line.strip("\n").split()
+            team = Algorithms.rarestfirst(graph, task)
+            team_graph = graph.subgraph(team.experts).copy()
             record = ""
             record += str(len(task))
             record += "\t" + str(team.cardinality())
-            record += "\t" + str(team.radius(graph))
-            record += "\t" + str(team.diameter(graph))
-            record += "\t" + str(round(team.leader_distance(graph), 2))
-            record += "\t" + str(round(team.leader_skill_distance(graph, task), 2))
-            record += "\t" + str(round(team.sum_distance(graph, task), 2))
+            record += "\t" + str(team.radius(team_graph))
+            record += "\t" + str(team.diameter(team_graph))
+            record += "\t" + str(team.leader_distance(team_graph))
+            record += "\t" + str(team.leader_skill_distance(team_graph, task))
+            record += "\t" + str(team.sum_distance(team_graph, task))
             # record += "\t" + str(format(team.shannon_diversity(team, task), "1.2f"))
             # record += "\t" + str(format(team.simpson_density(team, task), "1.2f"))
             # record += "\t" + str(format(team.simpson_diversity(team, task), "1.2f"))

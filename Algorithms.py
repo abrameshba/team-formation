@@ -1,3 +1,5 @@
+import dblp_ds
+
 def rarestfirst(l_graph, l_task):
     """
     returns team of experts with minimum diameter distance
@@ -8,9 +10,9 @@ def rarestfirst(l_graph, l_task):
     import utilities
     from Team import Team
     import networkx as nx
-    l_skill_expert = utilities.get_skill_experts_dict(l_graph)
+    l_skill_expert = dblp_ds.get_skill_experts_dict(l_graph)
     rare_skills_support = [min([(len(l_skill_expert[l_skill]), l_skill) for l_skill in l_task], key=lambda x: x[0])]
-    print(rare_skills_support)
+    # print(rare_skills_support)    # print rarest skill support and skill
     rare_skills = [l_skill for count, l_skill in rare_skills_support]
     min_dd = 100  # minimum diameter distance
     best_team = Team()
@@ -48,15 +50,13 @@ def rarestfirst(l_graph, l_task):
                         else:
                             team.skills[closest_expert].append(l_skill)
             team_graph = team.get_team_graph(l_graph)
-            for exp in team.experts:
-                all_exps.add(exp)
             dd = team.diameter(team_graph)
-            print(team)
+            # print(team)
             if dd is not None:
                 if min_dd > dd:
                     min_dd = dd
                     best_team = team
-    return best_team, all_exps
+    return best_team
 
 
 def best_sum_distance(l_graph, l_task):
@@ -123,16 +123,16 @@ def tfs(l_graph, l_task):  # twice of average degree
     # rds = nx.radius(l_graph)
     avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
     hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
-                 d >= avg_degree and
+                 d >= 2 * avg_degree and
                  len(set(l_graph.nodes[n]["skills"].split(",")).intersection(set(l_task))) > 0],
                 reverse=True)
     best_team = Team()
     team = Team()
     best_ldr_distance = 1000
     expert_skills = utilities.get_expert_skills_dict(l_graph)
-    skill_experts = utilities.get_skill_experts_dict(l_graph)
+    skill_experts = dblp_ds.get_skill_experts_dict(l_graph)
     random_expert_added = 0
-    print(hc)
+    # print(hc)
     for c_node in hc:
         task_copy = l_task[:]
         hops = 1
@@ -231,16 +231,16 @@ def tfc(l_graph, l_task):  # twice of average degree
     # rds = nx.radius(l_graph)
     avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
     hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
-                 d >= avg_degree and
+                 d >= 2 * avg_degree and
                  len(set(l_graph.nodes[n]["skills"].split(",")).intersection(set(l_task))) > 0],
                 reverse=True)
     best_team = Team()
     team = Team()
     best_ldr_distance = 1000
     expert_skills = utilities.get_expert_skills_dict(l_graph)
-    skill_experts = utilities.get_skill_experts_dict(l_graph)
+    skill_experts = dblp_ds.get_skill_experts_dict(l_graph)
     random_expert_added = 0
-    print(hc)
+    # print(hc)
     for c_node in hc:
         task_copy = l_task[:]
         hops = 1
