@@ -25,7 +25,7 @@ def get_skills(publication) -> list:
     return sorted(lst)
 
 
-def get_cmnt_skills(publication) -> list:
+def get_task_from_title_graph(graph, publication) -> list:
     """
     returns non trivial words of publication as skills packed in set
     used to get skills of an expert
@@ -36,17 +36,22 @@ def get_cmnt_skills(publication) -> list:
     from nltk import word_tokenize
     import re
     all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
-    skills = set()
-    dblp_skills = set()
+    task_skills = set()
+    graph_skills = set()
     import networkx as nx
-    graph = nx.read_gml("../dblp-2015/jdblp.gml")
+    skill_name_id_dict = dict()
+    with open("../dblp-2015/sigmod-skills.txt", "r") as file:
+        for line in file:
+            line_words = line.strip("\n").split("\t")
+            skill_name_id_dict[line_words[1]] = line_words[0]
     for node in graph.nodes():
-        for skill in graph.nodes[node]["skills"]:
-            dblp_skills.add(skill)
+        if len(graph.nodes[node]) == 2:
+            for skill in graph.nodes[node]["skills"].split(","):
+                graph_skills.add(skill)
     for word in all_words:
-        if word.lower() in dblp_skills:
-            skills.add(word.lower())
-    lst = list(skills)
+        if word.lower() in skill_name_id_dict:
+            task_skills.add(skill_name_id_dict[word.lower()])
+    lst = list(task_skills.intersection(graph_skills))
     return sorted(lst)
 
 
@@ -83,6 +88,20 @@ def get_skill_experts_dict(l_graph) -> dict:
                     pass
     return skill_experts
 
+def get_task_graph(l_graph, l_task):
+    """
+    return subgraph experts with shortest paths among
+    :param l_graph:
+    :return dict:
+    """
+    import networkx as nx
+    task_experts = set()
+    skill_set = set(l_task)
+    for node in l_graph.nodes():
+        if len(l_graph.nodes[node]) > 0:
+            if len(set(l_graph.nodes[node]["skills"].split(",")).intersection(skill_set))>0:
+                task_experts.add(node)
+    return l_graph.subgraph(task_experts).copy()
 
 def get_task(publication) -> list:
     """
@@ -102,7 +121,7 @@ def get_task(publication) -> list:
     local_dict = list_to_freq(filtered_words)
     print(filtered_words)
     skills_dict = dict()
-    with open("../dblp-2020/vldb-skills.txt", "r") as file:
+    with open("../dblp-2015/sigmod-skills.txt", "r") as file:
         for line in file:
             words = line.strip("\n").split()
             skills_dict[words[1]] = words[0]

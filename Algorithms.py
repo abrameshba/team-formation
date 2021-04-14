@@ -7,13 +7,14 @@ def rarestfirst(l_graph, l_task):
     """
     import utilities
     from Team import Team
-    import measurements
     import networkx as nx
     l_skill_expert = utilities.get_skill_experts_dict(l_graph)
     rare_skills_support = [min([(len(l_skill_expert[l_skill]), l_skill) for l_skill in l_task], key=lambda x: x[0])]
+    print(rare_skills_support)
     rare_skills = [l_skill for count, l_skill in rare_skills_support]
     min_dd = 100  # minimum diameter distance
     best_team = Team()
+    all_exps = set()
     for rare_skill in rare_skills:
         for candidate in l_skill_expert[rare_skill]:
             team = Team()
@@ -47,13 +48,15 @@ def rarestfirst(l_graph, l_task):
                         else:
                             team.skills[closest_expert].append(l_skill)
             team_graph = team.get_team_graph(l_graph)
+            for exp in team.experts:
+                all_exps.add(exp)
             dd = team.diameter(team_graph)
             print(team)
             if dd is not None:
                 if min_dd > dd:
                     min_dd = dd
                     best_team = team
-    return best_team
+    return best_team, all_exps
 
 
 def best_sum_distance(l_graph, l_task):

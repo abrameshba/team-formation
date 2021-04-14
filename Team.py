@@ -5,6 +5,7 @@ class Team:
         self.skills = dict()
         self.record = ""
         self.leader = ""
+        self.close_experts = set()
 
     def __str__(self):  # real signature unknown
         """ Return str(self). """
@@ -38,6 +39,7 @@ class Team:
     def diameter(self, l_graph) -> float:
         """
         return diameter of graph formed by team
+        diam(G) := max{dist_{G,w}(u,v) | u ∈ V(G),v ∈ V(G)}.
         :param l_graph:
         :return:
         """
@@ -46,7 +48,11 @@ class Team:
         if nx.number_of_nodes(t_graph) < 2:
             return 0
         else:
-            return nx.diameter(t_graph)
+            sp = dict()
+            for nd in t_graph.nodes:
+                sp[nd] = nx.single_source_dijkstra_path_length(t_graph,nd)
+            e = nx.eccentricity(t_graph, sp=sp)
+            return nx.diameter(t_graph, e)
 
     def radius(self, l_graph) -> float:
         """
@@ -59,7 +65,11 @@ class Team:
         if nx.number_of_nodes(t_graph) < 2:
             return 0
         else:
-            return nx.radius(t_graph)
+            sp = dict()
+            for nd in t_graph.nodes:
+                sp[nd] = nx.single_source_dijkstra_path_length(t_graph,nd)
+            e = nx.eccentricity(t_graph, sp=sp)
+            return nx.radius(t_graph, e)
 
     def sum_distance(self, l_graph, task) -> float:
         """
