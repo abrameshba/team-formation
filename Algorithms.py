@@ -7,7 +7,6 @@ def rarestfirst(l_graph, l_task):
     :param l_task:
     :return tuple(set, dictionary, string):
     """
-    import utilities
     from Team import Team
     import networkx as nx
     l_skill_expert = dblp_ds.get_skill_experts_dict(l_graph)
@@ -16,7 +15,6 @@ def rarestfirst(l_graph, l_task):
     rare_skills = [l_skill for count, l_skill in rare_skills_support]
     min_dd = 100  # minimum diameter distance
     best_team = Team()
-    all_exps = set()
     for rare_skill in rare_skills:
         for candidate in l_skill_expert[rare_skill]:
             team = Team()
@@ -67,10 +65,9 @@ def best_sum_distance(l_graph, l_task):
     :return tuple(set, dictionary, string):
     """
     import utilities
-    import measurements
     from Team import Team
     import networkx as nx
-    l_skill_expert = utilities.get_skill_experts_dict(l_graph)
+    l_skill_expert = dblp_ds.get_skill_experts_dict(l_graph)
     least_sum_distance = 10000
     best_team = Team()
     for skill_i in l_task:
@@ -101,7 +98,7 @@ def best_sum_distance(l_graph, l_task):
                         else:
                             team.skills[closest_expert].append(skill_j)
             sum_dist = team.sum_distance(l_graph, l_task)
-            print(team)
+            # print(team)
             if sum_dist < least_sum_distance:
                 least_sum_distance = sum_dist
                 best_team = team
@@ -116,11 +113,9 @@ def tfs(l_graph, l_task):  # twice of average degree
     :return:
     """
     import random
-    import measurements
     from Team import Team
     import utilities
     import networkx as nx
-    # rds = nx.radius(l_graph)
     avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
     hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
                  d >= 2 * avg_degree and
@@ -216,7 +211,7 @@ def tfs(l_graph, l_task):  # twice of average degree
     return best_team
 
 
-def tfc(l_graph, l_task):  # twice of average degree
+def tfr(l_graph, l_task):  # twice of average degree
     """
     return community based team formation using closest expert.
     :param l_graph:
@@ -224,11 +219,9 @@ def tfc(l_graph, l_task):  # twice of average degree
     :return:
     """
     import random
-    import measurements
     from Team import Team
     import utilities
     import networkx as nx
-    # rds = nx.radius(l_graph)
     avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
     hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
                  d >= 2 * avg_degree and
@@ -325,7 +318,6 @@ def best_leader_distance(l_graph, l_task):
     :return Team :
     """
     import utilities
-    import measurements
     import networkx as nx
     from Team import Team
     l_skill_expert = utilities.get_skill_experts_dict(l_graph)

@@ -35,7 +35,6 @@ def knbrcover(l_graph, start, k):
     dnbrs = nbrs.copy()
     hopskillcover = set()
     for n in dnbrs:
-        skls = []
         if len(l_graph.nodes[n])>0:
             skls = list(filter(None, l_graph.nodes[n]["skills"].split(",")))
             if len(skls) == 0:

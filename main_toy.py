@@ -63,57 +63,53 @@ def toy():
         record = ""
         record += str(len(task))
         record += "\t" + str(tm.cardinality())
-        # record += "\t" + str(team.radius(tg))
-        # record += "\t" + str(team.diameter(tg))
-        # record += "\t" + str(round(team.leader_distance(tg), 2))
-        # record += "\t" + str(round(team.leader_skill_distance(tg, task), 2))
-        # record += "\t" + str(round(team.sum_distance(tg, task), 2))
-        # print(tm)
-        record += "\t" + str(format(tm.shannon_diversity(tg), "1.2f"))
-        record += "\t" + str(format(tm.simpson_density(tg), "1.2f"))
-        record += "\t" + str(format(tm.simpson_diversity(tg), "1.2f"))
-        record += "\t" + str(format(tm.gini_simpson_diversity(tg), "1.2f"))
+        record += "\t" + str(team.radius(tg))
+        record += "\t" + str(team.diameter(tg))
+        record += "\t" + str(team.leader_distance(tg))
+        record += "\t" + str(team.leader_skill_distance(tg, task))
+        record += "\t" + str(team.sum_distance(tg, task))
+        record += "\t" + str(tm.shannon_diversity(tg))
+        record += "\t" + str(tm.simpson_density(tg))
+        record += "\t" + str(tm.simpson_diversity(tg))
+        record += "\t" + str(tm.gini_simpson_diversity(tg))
         print(record)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
     # toy()
     import networkx as nx
-
     graph = nx.read_gml("/home/cilab/PycharmProjects/dblp-2015/sigmod.gml")
     skills_name_id_dict = dict()
-    with open("../dblp-2015/sigmod-skills.txt", "r") as file:
-        for line in file:
-            line_words = line.strip("\n").split("\t")
-            skills_name_id_dict[line_words[1]] = line_words[0]
-        del line_words, line
-    dblp_data = DBLP_Data("2015")
-    with open("/home/cilab/PycharmProjects/dblp-2015/sigmod-titles.txt") as file:
-        for line in file:
-            task = dblp_data.get_task_from_title_graph(graph, line.strip("\n").split("\t")[1])
-            if len(task) > 9:
-                # print(line)
+    # dblp_data = DBLP_Data("2015")
+    # with open("/home/cilab/PycharmProjects/dblp-2015/sigmod-titles.txt") as file:
+    #     for line in file:
+    #         task = dblp_data.get_task_from_title_graph(graph, line.strip("\n").split("\t")[1])
+    #         if len(task) > 9:
+    with  open("/home/cilab/PycharmProjects/dblp-2015/sigmod-17-tasks-0.txt") as file:
+            for line in file:
+                # task = dblp_data.get_task_from_title_graph(graph, line.strip("\n").split("\t")[1])
+                task = line.strip("\n").split()
+                # print(task)
                 record = ""
                 # task_graph = utilities.get_task_graph(graph, task)
                 # largest_cc = task_graph.subgraph(max([cc for cc in nx.connected_components(task_graph)])).copy()
                 # nx.draw(largest_cc, with_labels=True)
                 # plt.show()
-                team = Algorithms.tfc(graph, task)
+                team = Algorithms.best_sum_distance(graph, task)
                 tg = graph.subgraph(team.experts).copy()
                 # show_graph(tg)
                 record += str(len(task))
                 record += "\t" + str(team.cardinality())
-                # record += "\t" + str(team.radius(tg))
-                # record += "\t" + str(team.diameter(tg))
-                # record += "\t" + str(round(team.leader_distance(tg), 2))
-                # record += "\t" + str(round(team.leader_skill_distance(tg, task), 2))
-                # record += "\t" + str(round(team.sum_distance(tg, task), 2))
-                # print(team)
-                record += "\t" + str(format(team.shannon_diversity(tg), "1.2f"))
-                record += "\t" + str(format(team.simpson_density(tg), "1.2f"))
-                record += "\t" + str(format(team.simpson_diversity(tg), "1.2f"))
-                record += "\t" + str(format(team.gini_simpson_diversity(tg), "1.2f"))
-                print(line.split()[0]+"\t"+record)
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+                record += "\t" + str(team.radius(tg))
+                record += "\t" + str(team.diameter(tg))
+                record += "\t" + str(team.leader_distance(tg))
+                record += "\t" + str(team.leader_skill_distance(tg, task))
+                record += "\t" + str(team.sum_distance(tg, task))
+                record += "\t" + str(team.shannon_diversity(tg))
+                # record += "\t" + str(team.simpson_density(tg))
+                record += "\t" + str(team.simpson_diversity(tg))
+                record += "\t" + str(team.gini_simpson_diversity(tg))
+                record += "\t" + ",".join(team.experts)
+                print(record)
+
