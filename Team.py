@@ -245,7 +245,6 @@ class Team:
             return round(1 - (self.simpson_gamma_task_density(l_graph)), 3)
 
 
-
 if __name__ == "__main__":
     team = Team()
     import sys
