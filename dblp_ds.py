@@ -4,48 +4,48 @@ import time
 from tqdm import tqdm
 
 
-class DBLPRecord:
-
-    def __init__(self):
-        self.title = ""
-        self.authors = set()
-        self.year = ""
-        self.journal = ""
-
-
-def get_task_graph(l_graph, l_task):
-    """
-    return subgraph experts with shortest paths among
-    :param l_task:
-    :param l_graph:
-    :return dict:
-    """
-    task_experts = set()
-    skill_set = set(l_task)
-    for node in l_graph.nodes():
-        if len(l_graph.nodes[node]) > 0:
-            if len(set(l_graph.nodes[node]["skills"].split(",")).intersection(skill_set)) > 0:
-                task_experts.add(node)
-    return l_graph.subgraph(task_experts).copy()
+# class DBLPRecord:
+#
+#     def __init__(self):
+#         self.title = ""
+#         self.authors = set()
+#         self.year = ""
+#         self.journal = ""
 
 
-def get_skill_experts_dict(l_graph) -> dict:
-    """
-    return skill expert community dictionary for input l_graph
-    :param l_graph:
-    :return dict:
-    """
-    skill_experts = dict()
-    for node in l_graph.nodes():
-        if len(l_graph.nodes[node]) > 0:
-            for skill in l_graph.nodes[node]["skills"].split(","):
-                if skill in skill_experts:
-                    skill_experts[skill].append(node)
-                elif skill not in skill_experts:
-                    skill_experts[skill] = list([node])
-                else:
-                    pass
-    return skill_experts
+# def get_task_graph(l_graph, l_task):
+#     """
+#     return subgraph experts with shortest paths among
+#     :param l_task:
+#     :param l_graph:
+#     :return dict:
+#     """
+#     task_experts = set()
+#     skill_set = set(l_task)
+#     for node in l_graph.nodes():
+#         if len(l_graph.nodes[node]) > 0:
+#             if len(set(l_graph.nodes[node]["skills"].split(",")).intersection(skill_set)) > 0:
+#                 task_experts.add(node)
+#     return l_graph.subgraph(task_experts).copy()
+
+
+# def get_skill_experts_dict(l_graph) -> dict:
+#     """
+#     return skill expert community dictionary for input l_graph
+#     :param l_graph:
+#     :return dict:
+#     """
+#     skill_experts = dict()
+#     for node in l_graph.nodes():
+#         if len(l_graph.nodes[node]) > 0:
+#             for skill in l_graph.nodes[node]["skills"].split(","):
+#                 if skill in skill_experts:
+#                     skill_experts[skill].append(node)
+#                 elif skill not in skill_experts:
+#                     skill_experts[skill] = list([node])
+#                 else:
+#                     pass
+#     return skill_experts
 
 
 def get_cmnt_skills(publication) -> list:
@@ -65,8 +65,8 @@ def get_cmnt_skills(publication) -> list:
     setofwords = set(brown.words())
     for word in all_words:
         if word.lower() not in stopwords.words('english') and len(word) > 2:
-            filtered_words.add(word.lower(setofwords))
-    lst = list(filtered_words.intersection())
+            filtered_words.add(word.lower())
+    lst = list(filtered_words.intersection(setofwords))
     return sorted(lst)
 
 
@@ -372,7 +372,7 @@ class DBLP_Data:
                         str(author) + "\t" + ",".join([str(intg) for intg in author_id_skill_ids_dict[author]]) + "\n")
         else:
             dblp_skill_name_id_dict = dict()
-            with open("../dblp-" + self.year + "/" + network + "-skills.txt", "r") as file:
+            with open("../dblp-" + self.year + "/db-skills.txt", "r") as file:
                 for line in file:
                     line_words = line.strip("\n").split()
                     dblp_skill_name_id_dict[line_words[1]] = line_words[0]
@@ -382,9 +382,10 @@ class DBLP_Data:
                 author_id_skill_ids_dict[author] = list()
                 for pub_id in author_id_pubs_dict[author]:
                     pub_s += " " + dblp_title_id_name_dict[pub_id]
-                all_skills = get_cmnt_skills(pub_s)
-                for skill in all_skills:
-                    author_id_skill_ids_dict[author].append(dblp_skill_name_id_dict[skill])
+                    all_skills = get_cmnt_skills(pub_s)
+                    for skill in all_skills:
+                        if skill in dblp_skill_name_id_dict:
+                            author_id_skill_ids_dict[author].append(dblp_skill_name_id_dict[skill])
             for author_id in tqdm(author_id_skill_ids_dict, total=len(author_id_skill_ids_dict)):
                 if len(author_id_skill_ids_dict[author_id]) > 0:
                     open("../dblp-" + self.year + "/" + network + "-author-skills.txt", "a").write(
@@ -392,7 +393,7 @@ class DBLP_Data:
                                                           author_id_skill_ids_dict[author_id]]) + "\n")
 
     def build_graph(self, network):
-        import matplotlib.pyplot as plt
+        # import matplotlib.pyplot as plt
         # Read authors : nodes
         author_id_name_dict = dict()
         with open("../dblp-" + self.year + "/" + network + "-authors.txt", "r") as file:
@@ -420,8 +421,10 @@ class DBLP_Data:
         import networkx as nx
         graph = nx.Graph()
         graph.name = network + " Network"
-        for author in author_id_skill_ids_dict:
-            graph.add_node(author, name=author_id_name_dict[author], skills=author_id_skill_ids_dict[author])
+        for author_id in author_id_skill_ids_dict:
+            if author_id in author_id_name_dict:
+                graph.add_node(author_id, name=author_id_name_dict[author_id],
+                               skills=author_id_skill_ids_dict[author_id])
         for collab in collab_id_pub_ids_dict:
             u = collab.split(":")[0]
             v = collab.split(":")[1]
@@ -429,12 +432,13 @@ class DBLP_Data:
             den = len(author_id_pub_ids_dict[u].split(",")) + len(author_id_pub_ids_dict[v].split(",")) - num
             jd = round(num / den, 3)
             graph.add_edge(u, v, weight=jd)
-        largest_cc = graph.subgraph(max([cc for cc in nx.connected_components(graph)])).copy()
+        largest_cc = graph.subgraph(sorted(nx.connected_components(graph), key=len, reverse=True)[0])
+        # largest_cc = graph.subgraph(max([cc for cc in nx.connected_components(graph)])).copy()
         nx.draw_circular(largest_cc, with_labels=True)
         nx.write_gml(largest_cc, "../dblp-" + self.year + "/" + network + ".gml")
-        plt.show()
+        # plt.show()
 
-    def generate_community_tasks(self, community, tasks) -> None:
+    def generate_community_tasks(self, community, ntasks) -> None:
         """
         This method called once, generates community tasks 1700 and 17
         :return:
@@ -444,23 +448,22 @@ class DBLP_Data:
         import networkx as nx
         max_no = 0
         graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
-        graph = graph.subgraph(max([cc for cc in nx.connected_components(graph)])).copy()
-        community_skills = self.get_community_skill_set(graph)
+        community_skills = self.get_community_skills_set(graph)
         for _ in range(5):
-            file_list = glob.glob("../dblp-" + self.year + "/" + community + "-" + str(tasks) + "-*.txt")
+            file_list = glob.glob("../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-*.txt")
             if len(file_list) >= 5:
                 print("please delete existing(old) files")
                 break
             elif len(file_list) > 0:
                 max_no = len(file_list)
-                file_path = "../dblp-" + self.year + "/" + community + "-" + str(tasks) + "-tasks-" \
+                file_path = "../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-tasks-" \
                             + str(max_no) + ".txt"
             else:
-                file_path = "../dblp-" + self.year + "/" + community + "-" + str(tasks) + "-tasks-" \
+                file_path = "../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-tasks-" \
                             + str(max_no) + ".txt"
             all_tasks = list()
             open(file_path, "w").close()
-            if tasks == 17:
+            if ntasks == 17:
                 for skills_count in range(4, 21):
                     task = set()
                     while len(task) < skills_count:
@@ -487,7 +490,7 @@ class DBLP_Data:
                         all_tasks.clear()
 
     @staticmethod
-    def get_community_skill_set(graph) -> set:
+    def get_community_skills_set(graph) -> set:
         """
         skill set of community is returned
         :param graph:
@@ -516,12 +519,12 @@ class DBLP_Data:
         task_skills = set()
         graph_skills = set()
         skill_name_id_dict = dict()
-        with open("../dblp-" + self.year + "/sigmod-skills.txt", "r") as file:
+        with open("../dblp-" + self.year + "/dblp-skills.txt", "r") as file:
             for line in file:
                 line_words = line.strip("\n").split("\t")
                 skill_name_id_dict[line_words[1]] = line_words[0]
         for node in graph.nodes():
-            if len(graph.nodes[node]) == 2:
+            if len(graph.nodes[node]) >= 2:
                 for skill in graph.nodes[node]["skills"].split(","):
                     graph_skills.add(skill)
         for word in all_words:
@@ -530,42 +533,13 @@ class DBLP_Data:
         lst = list(task_skills.intersection(graph_skills))
         return sorted(lst)
 
-    def get_task(self, publication) -> list:
-        """
-        return list of skills(id) of task of parameter
-        used to get non-trivial words of parameter(publication) that matched with skills
-        :param publication:
-        :return:
-        """
-        from nltk import word_tokenize
-        import re
-        import utilities
-        from nltk.corpus import stopwords
-        all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
-        filtered_words = list()
-        for word in all_words:
-            if word not in stopwords.words('english') and len(word) > 2:
-                filtered_words.append(word.lower())
-        local_dict = utilities.list_to_freq(filtered_words)
-        print(filtered_words)
-        skills_dict = dict()
-        with open("../dblp-" + self.year + "/sigmod-skills.txt", "r") as file:
-            for line in file:
-                words = line.strip("\n").split()
-                skills_dict[words[1]] = words[0]
-        task_str = set(local_dict.keys()).intersection(set(skills_dict.keys()))
-        task = list()
-        for wrd in task_str:
-            task.append(skills_dict[wrd])
-            print(wrd + "\t" + skills_dict[wrd])
-        return list(task)  # returns list of id's of skills
-
 
 def multiprocessing_func(l_txt):
-    dblp_dt = DBLP_Data(myear)
-    dblp_dt.write_authors_info(l_txt)
-    dblp_dt.write_titles_info(l_txt)
-    dblp_dt.write_skills_info(l_txt)
+    nyear = "2015"
+    dblp_dt = DBLP_Data(nyear)
+    # dblp_dt.write_authors_info(l_txt)
+    # dblp_dt.write_titles_info(l_txt)
+    # dblp_dt.write_skills_info(l_txt)
     dblp_dt.build_graph(l_txt)
     dblp_dt.generate_community_tasks(l_txt, 17)
 
@@ -578,13 +552,14 @@ if __name__ == '__main__':
     # dblp_data.write_authors_info(mnetwork)
     # dblp_data.write_titles_info(mnetwork)
     # dblp_data.write_skills_info(mnetwork)
-    # dblp_data.build_graph(mnetwork)
+    dblp_data.build_graph(mnetwork)
+    dblp_data.generate_community_tasks(mnetwork, 17)
     processes = []
-    for txt in ["sigmod", "vldb"]:
+    for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods"]:
+        # for txt in ["pods"]:
         p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
         processes.append(p)
         p.start()
     for process in processes:
         process.join()
-    dblp_data.generate_community_tasks(txt, 17)
     tqdm.write('Time taken = {} seconds'.format(time.time() - start_time))

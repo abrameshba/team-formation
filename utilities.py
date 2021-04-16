@@ -75,3 +75,11 @@ def remove_numbers_symbols(instring):
     result1 = re.sub(r'[^\w]', ' ', instring)
     result = ''.join([i for i in result1 if not i.isdigit()])
     return result
+
+def show_mygraph(d_graph):
+    import networkx as nx
+    pos = nx.spring_layout(d_graph)  # pos = nx.nx_agraph.graphviz_layout(G)
+    nx.draw_networkx(d_graph, pos)
+    labels = nx.get_edge_attributes(d_graph, 'weight')
+    nx.draw_networkx_edge_labels(d_graph, pos, edge_labels=labels)
+    plt.show()

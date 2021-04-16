@@ -19,6 +19,21 @@ class Team:
     def cardinality(self):
         return len(self.experts)
 
+    def get_leader_team_graph(self, l_graph):
+        """
+        return graph formed by team
+        :param l_graph:
+        :return:
+        """
+        nodes = set()
+        import networkx as nx
+        for nd1 in self.experts:
+            if nd1 != self.leader:
+                if nx.has_path(l_graph, nd1, self.leader):
+                    for node in nx.dijkstra_path(l_graph, nd1, self.leader):
+                        nodes.add(node)
+        return l_graph.subgraph(nodes).copy()
+
     def get_team_graph(self, l_graph):
         """
         return graph formed by team
@@ -65,17 +80,17 @@ class Team:
         if nx.number_of_nodes(t_graph) < 2:
             return 0
         else:
-            sp = dict()
+            shp = dict()
             for nd in t_graph.nodes:
-                sp[nd] = nx.single_source_dijkstra_path_length(t_graph, nd)
+                shp[nd] = nx.single_source_dijkstra_path_length(t_graph, nd)
             try:
-                e = nx.eccentricity(t_graph, sp=sp)
-            except TypeError as e:
+                eccent = nx.eccentricity(t_graph, sp=shp)
+            except TypeError as eccent:
                 nx.draw_circular(t_graph, with_labels=True)
                 plt.show()
                 msg = "Found infinite path length because the graph is not" " connected"
-                raise nx.NetworkXError(msg) from e
-            return round(nx.radius(t_graph, e), 3)
+                raise nx.NetworkXError(msg) from eccent
+            return round(nx.radius(t_graph, eccent), 3)
 
     def sum_distance(self, l_graph, task) -> float:
         """
@@ -114,12 +129,12 @@ class Team:
         if len(self.experts) < 2:
             return 0
         else:
-            for skill in l_task:
-                for member in self.experts:
-                    if member in self.experts and skill in self.skills[member]:
-                        if nx.has_path(l_graph, self.leader, member):
-                            ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="weight")
-                            continue
+            for l_skill in self.skills[self.leader]:
+                for skill in l_task:
+                    for member in self.experts:
+                        if l_skill != skill and member != self.leader and skill in self.skills[member]:
+                            if nx.has_path(l_graph, self.leader, member):
+                                ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="weight")
         return round(ld, 3)
 
     def leader_distance(self, l_graph) -> float:
@@ -139,7 +154,27 @@ class Team:
                         ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="weight")
         return round(ld, 3)
 
-    def shannon_diversity(self, l_graph):
+    def shannon_gamma_team_diversity(self, l_graph):
+        """
+        returns Shannon entropy
+        :param l_graph:
+        :return:
+        """
+        import math
+        shannon_sum = 0
+        tot_skls = set()
+        for node in self.experts:
+            tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
+        for skill in tot_skls:
+            cn = 0
+            for node in self.experts:
+                if skill in l_graph.nodes[node]["skills"].split(","):
+                    cn += 1
+            prob = cn / len(self.experts)
+            shannon_sum += prob * math.log(prob)
+        return round(((-1 * shannon_sum) / len(tot_skls)), 3)
+
+    def shannon_gamma_task_diversity(self, l_graph):
         """
         returns Shannon entropy
         :param l_graph:
@@ -158,20 +193,9 @@ class Team:
                     cn += 1
             prob = cn / len(self.experts)
             shannon_sum += (prob * math.log(prob))
-        # shannon_sum = 0
-        # tot_skls = set()
-        # for node in self.experts:
-        #     tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
-        # for skill in tot_skls:
-        #     cn = 0
-        #     for node in self.experts:
-        #         if skill in l_graph.nodes[node]["skills"].split(","):
-        #             cn += 1
-        #     prob = cn / len(self.experts)
-        #     shannon_sum += prob * math.log(prob)
         return round(((-1 * shannon_sum) / len(task)), 3)
 
-    def simpson_density(self, l_graph):
+    def simpson_gamma_task_density(self, l_graph):
         """
         calculates reciprocal simpson diversity
         :return:
@@ -188,24 +212,38 @@ class Team:
                     cn += 1
             prob = cn / len(self.experts)
             simpson_sum += pow(prob, 2)
-        # simpson_sum = 0
-        # tot_skls = set()
-        # for node in self.experts:
-        #     tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
-        # for skill in tot_skls:
-        #     cn = 0
-        #     for node in self.experts:
-        #         if skill in l_graph.nodes[node]["skills"].split(","):
-        #             cn += 1
-        #     prob = cn / len(self.experts)
-        #     simpson_sum += pow(prob, 2)
         return round(simpson_sum / len(task), 3)
 
-    def simpson_diversity(self, l_graph):
-        return round(1 / (self.simpson_density(l_graph)), 3)
+    def simpson_gamma_team_density(self, l_graph):
+        """
+        calculates reciprocal simpson diversity
+        :return:
+        """
+        simpson_sum = 0
+        tot_skls = set()
+        for node in self.experts:
+            tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
+        for skill in tot_skls:
+            cn = 0
+            for node in self.experts:
+                if skill in l_graph.nodes[node]["skills"].split(","):
+                    cn += 1
+            prob = cn / len(self.experts)
+            simpson_sum += pow(prob, 2)
+        return round(simpson_sum / len(tot_skls), 3)
 
-    def gini_simpson_diversity(self, l_graph):
-        return round(1 - self.simpson_density(l_graph), 3)
+    def simpson_diversity(self, l_graph, bool_team):
+        if bool_team:
+            return round(1 / (self.simpson_gamma_team_density(l_graph)), 3)
+        else:
+            return round(1 / (self.simpson_gamma_task_density(l_graph)), 3)
+
+    def gini_simpson_diversity(self, l_graph, bool_team):
+        if bool_team:
+            return round(1 - (self.simpson_gamma_team_density(l_graph)), 3)
+        else:
+            return round(1 - (self.simpson_gamma_task_density(l_graph)), 3)
+
 
 
 if __name__ == "__main__":
