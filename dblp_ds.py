@@ -29,23 +29,23 @@ from tqdm import tqdm
 #     return l_graph.subgraph(task_experts).copy()
 
 
-# def get_skill_experts_dict(l_graph) -> dict:
-#     """
-#     return skill expert community dictionary for input l_graph
-#     :param l_graph:
-#     :return dict:
-#     """
-#     skill_experts = dict()
-#     for node in l_graph.nodes():
-#         if len(l_graph.nodes[node]) > 0:
-#             for skill in l_graph.nodes[node]["skills"].split(","):
-#                 if skill in skill_experts:
-#                     skill_experts[skill].append(node)
-#                 elif skill not in skill_experts:
-#                     skill_experts[skill] = list([node])
-#                 else:
-#                     pass
-#     return skill_experts
+def get_skill_experts_dict(l_graph) -> dict:
+    """
+    return skill expert community dictionary for input l_graph
+    :param l_graph:
+    :return dict:
+    """
+    skill_experts = dict()
+    for node in l_graph.nodes():
+        if len(l_graph.nodes[node]) > 0:
+            for skill in l_graph.nodes[node]["skills"].split(","):
+                if skill in skill_experts:
+                    skill_experts[skill].append(node)
+                elif skill not in skill_experts:
+                    skill_experts[skill] = list([node])
+                else:
+                    pass
+    return skill_experts
 
 
 def get_cmnt_skills(publication) -> list:
