@@ -53,7 +53,7 @@ class Team:
     def diameter(self, l_graph) -> float:
         """
         return diameter of graph formed by team
-        diam(G) := max{dist_{G,w}(u,v) | u ∈ V(G),v ∈ V(G)}.
+        diam(X) := max{sp_{X}(u,v) | u,v ∈ X}.
         :param l_graph:
         :return:
         """
