@@ -3,37 +3,41 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
+from tqdm import tqdm
+
 import Algorithms
 import utilities
-from tqdm import tqdm
-# import make_data_file
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    # toy()
+def main_run(algori):
     import networkx as nx
-
-    # for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "db"]:
-    for network in ["db"]:
-        graph = nx.read_gml("/home/cilab/PycharmProjects/dblp-2015/" + network + ".gml")
+    from Team import Team
+    year = "2015"
+    # for network in ["db"]:
+    for network in ["vldb", "icde", "icdt", "edbt", "pods", "sigmod", "db"]:
+        graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
         skills_name_id_dict = dict()
-        # with  open("/home/cilab/PycharmProjects/dblp-2015/" + network + "-titles.txt") as file:
-        with open("/home/cilab/PycharmProjects/dblp-2015/" + network + "-17-tasks-0.txt") as file:
-            open("/home/cilab/PycharmProjects/dblp-2015/" + network + "-17-tasks-0-results.txt", "w").close()
-            n_lines = utilities.get_num_lines("../dblp-2015/" + network + "-17-tasks-0.txt")
+        # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
+        with open("../dblp-" + year + "/" + network + "-17-tasks-0.txt") as file:
+            open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori + "-results.txt", "w").close()
+            open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori + "-teams.txt", "w").close()
+            n_lines = utilities.get_num_lines("../dblp-" + year + "/" + network + "-17-tasks-0.txt")
             for line in tqdm(file, total=n_lines):
                 # task = dblp_data.get_task_from_title_graph(graph, line.strip("\n").split("\t")[1])
                 task = line.strip("\n").split()
                 # print(task)
                 record = ""
-                team = Algorithms.rarestfirst(graph, task)
-                tg = team.get_leader_team_graph(graph)
+                team = Team()
+                if algori == "rfs":
+                    team = Algorithms.rarestfirst(graph, task)
+                elif algori == "tfs":
+                    team = Algorithms.tfs(graph, task)
+                elif algori == "bsd":
+                    team = Algorithms.best_sum_distance(graph, task)
+                else:
+                    print("No Algorithms selected, exiting")
+                    exit(0)
+                tg = team.get_team_graph(graph)
                 # show_graph(tg)
                 record += str(len(task))
                 record += "\t" + str(team.cardinality())
@@ -49,6 +53,32 @@ if __name__ == '__main__':
                 record += "\t" + str(team.simpson_diversity(tg, True))
                 record += "\t" + str(team.gini_simpson_diversity(tg, False))  # task diversity
                 record += "\t" + str(team.gini_simpson_diversity(tg, True))
-                record += "\t" + ",".join(team.experts)
-                open("/home/cilab/PycharmProjects/dblp-2015/" + network + "-17-tasks-0-results.txt", "a").write(record +
-                                                                                                                "\n")
+                open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori + "-results.txt", "a").write(
+                    record + "\n")
+                open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori + "-teams.txt", "a").write(
+                    ",".join(sorted(team.experts)) + "\n")
+
+
+def multiprocessing_func(algo):
+    main_run(algo)
+
+
+def print_hi(name):
+    # Use a breakpoint in the code line below to debug your script.
+    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+    import multiprocessing
+    import time
+
+    start_time = time.time()
+    processes = []
+    for alg in ["rfs", "tfs", "bsd"]:
+        p = multiprocessing.Process(target=multiprocessing_func, args=(alg,))
+        processes.append(p)
+        p.start()
+    for process in processes:
+        process.join()
+    tqdm.write('Time taken = {} seconds'.format(time.time() - start_time))
