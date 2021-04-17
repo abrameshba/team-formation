@@ -14,7 +14,8 @@ def main_run(algori):
     from Team import Team
     year = "2015"
     # for network in ["db"]:
-    for network in ["vldb", "icde", "icdt", "edbt", "pods", "sigmod", "db"]:
+    networks = ["vldb", "icde", "icdt", "edbt", "pods", "sigmod", "db"]
+    for network in tqdm(networks):
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
         # skills_name_id_dict = dict()
         # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
