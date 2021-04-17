@@ -4,19 +4,19 @@ This repository contains Python implementation of team formation algorithms that
 ├── clean_data.sh  
 ├── dblp-2015  
 ├── dblp-2020  
-├── diversity    
+├── diversity  
 └── team-formation  
-    ├── Algorithms.py  
-    ├── classes.dot  
-    ├── clean_data.sh  
-    ├── dblp_ds.py  
-    ├── LICENSE  
-    ├── main.py  
-    ├── make_uml_diags.sh  
-    ├── packages.dot  
-    ├── README.md  
-    ├── Team.py  
-    ├── tf_classes.png  
-    ├── tf_packages.png  
-    ├── Toys.py  
-    └── utilities.py  
+&nbsp;&nbsp;&nbsp;&nbsp;├── Algorithms.py  
+&nbsp;&nbsp;&nbsp;&nbsp;├── classes.dot  
+&nbsp;&nbsp;&nbsp;&nbsp;├── clean_data.sh  
+&nbsp;&nbsp;&nbsp;&nbsp;├── dblp_ds.py  
+&nbsp;&nbsp;&nbsp;&nbsp;├── LICENSE  
+&nbsp;&nbsp;&nbsp;&nbsp;├── main.py  
+&nbsp;&nbsp;&nbsp;&nbsp;├── make_uml_diags.sh  
+&nbsp;&nbsp;&nbsp;&nbsp;├── packages.dot  
+&nbsp;&nbsp;&nbsp;&nbsp;├── README.md  
+&nbsp;&nbsp;&nbsp;&nbsp;├── Team.py  
+&nbsp;&nbsp;&nbsp;&nbsp;├── tf_classes.png  
+&nbsp;&nbsp;&nbsp;&nbsp;├── tf_packages.png  
+&nbsp;&nbsp;&nbsp;&nbsp;├── Toys.py  
+&nbsp;&nbsp;&nbsp;&nbsp;└── utilities.py  
