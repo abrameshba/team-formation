@@ -116,7 +116,7 @@ class DBLP_Data:
         :return:
         """
         import utilities
-        if network == "db":
+        if network == "dblp":
             authors_name_set = set()
             with open("../dblp-" + self.year + "/" + network + ".txt") as file:
                 n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + network + ".txt")
@@ -142,7 +142,7 @@ class DBLP_Data:
                 author_id += 1
         else:
             dblp_author_name_id_dict = dict()
-            with open("../dblp-" + self.year + "/db-authors.txt", "r") as file:
+            with open("../dblp-" + self.year + "/dblp-authors.txt", "r") as file:
                 for line in file:
                     words = line.strip("\n").split("\t")
                     dblp_author_name_id_dict[words[1]] = words[0]
@@ -170,7 +170,7 @@ class DBLP_Data:
         :return:
         """
         import utilities
-        if network == "db":
+        if network == "dblp":
             titles_set = set()
             with open("../dblp-" + self.year + "/" + network + ".txt") as file:
                 n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + network + ".txt")
@@ -193,7 +193,7 @@ class DBLP_Data:
                 title_id += 1
         else:
             dblp_title_name_id_dict = dict()
-            with open("../dblp-" + self.year + "/db-titles.txt", "r") as file:
+            with open("../dblp-" + self.year + "/dblp-titles.txt", "r") as file:
                 for line in file:
                     words = line.strip("\n").split("\t")
                     dblp_title_name_id_dict[words[1]] = words[0]
@@ -340,7 +340,7 @@ class DBLP_Data:
         os.system("sort ../dblp-" + self.year + "/" + network + "-rec.txt > ../dblp-"
                   + self.year + "/" + network + "-records.txt")
         os.system("rm -v ../dblp-" + self.year + "/" + network + "-rec.txt >> /dev/null")
-        if network == "db":
+        if network == "dblp":
             skill_set = set()
             author_id_skills_dict = dict()
             for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
@@ -372,7 +372,7 @@ class DBLP_Data:
                         str(author) + "\t" + ",".join([str(intg) for intg in author_id_skill_ids_dict[author]]) + "\n")
         else:
             dblp_skill_name_id_dict = dict()
-            with open("../dblp-" + self.year + "/db-skills.txt", "r") as file:
+            with open("../dblp-" + self.year + "/dblp-skills.txt", "r") as file:
                 for line in file:
                     line_words = line.strip("\n").split()
                     dblp_skill_name_id_dict[line_words[1]] = line_words[0]
@@ -542,20 +542,22 @@ def multiprocessing_func(l_txt):
     # dblp_dt.write_skills_info(l_txt)
     dblp_dt.build_graph(l_txt)
     dblp_dt.generate_community_tasks(l_txt, 17)
-
+    dblp_dt.generate_community_tasks(l_txt, 1700)
 
 if __name__ == '__main__':
     start_time = time.time()
     myear = "2015"
-    mnetwork = "db"
+    mnetwork = "dblp"
     dblp_data = DBLP_Data(myear)
-    # dblp_data.write_authors_info(mnetwork)
-    # dblp_data.write_titles_info(mnetwork)
-    # dblp_data.write_skills_info(mnetwork)
+    dblp_data.write_authors_info(mnetwork)
+    dblp_data.write_titles_info(mnetwork)
+    dblp_data.write_skills_info(mnetwork)
     dblp_data.build_graph(mnetwork)
     dblp_data.generate_community_tasks(mnetwork, 17)
+    dblp_data.generate_community_tasks(mnetwork, 1700)
     processes = []
-    for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods"]:
+    for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
+                "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
         # for txt in ["pods"]:
         p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
         processes.append(p)

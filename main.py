@@ -16,7 +16,7 @@ def main_run(algori):
     # for network in ["db"]:
     for network in ["vldb", "icde", "icdt", "edbt", "pods", "sigmod", "db"]:
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
-        skills_name_id_dict = dict()
+        # skills_name_id_dict = dict()
         # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
         with open("../dblp-" + year + "/" + network + "-17-tasks-0.txt") as file:
             open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori + "-results.txt", "w").close()
