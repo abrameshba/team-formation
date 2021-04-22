@@ -14,12 +14,16 @@ def list_to_freq(wordlist) -> dict:
 
 
 # Ref: https://stackoverflow.com/questions/18393842/k-th-order-neighbors-in-graph-python-networkx
-def knbrs(l_gra, start, k):
+def within_k_nbrs(l_gra, start, k):
     nbrs = {start}
     for _ in range(k):
         nbrs = set((nbr for n in nbrs for nbr in l_gra[n]))
     return nbrs
 
+def at_k_nbrs(l_gra, start, k):
+    sub = within_k_nbrs(l_gra, start, k)
+    sup = within_k_nbrs(l_gra, start, k-1)
+    return sub.difference(sup)
 
 # Ref: https://thispointer.com/python-check-if-any-string-is-empty-in-a-list/
 def is_empty_or_blank(msg):
@@ -31,11 +35,11 @@ def is_empty_or_blank(msg):
 
 # Ref: https://stackoverflow.com/questions/18393842/k-th-order-neighbors-in-graph-python-networkx
 def knbrcover(l_graph, start, k):
-    nbrs = knbrs(l_graph, start, k)
+    nbrs = within_k_nbrs(l_graph, start, k)
     dnbrs = nbrs.copy()
     hopskillcover = set()
     for n in dnbrs:
-        if len(l_graph.nodes[n])>0:
+        if len(l_graph.nodes[n]) > 0:
             skls = list(filter(None, l_graph.nodes[n]["skills"].split(",")))
             if len(skls) == 0:
                 nbrs.remove(n)
@@ -76,8 +80,10 @@ def remove_numbers_symbols(instring):
     result = ''.join([i for i in result1 if not i.isdigit()])
     return result
 
+
 def show_mygraph(d_graph):
     import networkx as nx
+    import matplotlib.pyplot as plt
     pos = nx.spring_layout(d_graph)  # pos = nx.nx_agraph.graphviz_layout(G)
     nx.draw_networkx(d_graph, pos)
     labels = nx.get_edge_attributes(d_graph, 'weight')

@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 
-year=2020
+year=2015
 
 # remove existing files 
 rm -v ./"dblp-"$year/*.txt

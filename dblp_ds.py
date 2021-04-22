@@ -1,4 +1,3 @@
-import multiprocessing
 import time
 
 from tqdm import tqdm
@@ -48,7 +47,7 @@ def get_skill_experts_dict(l_graph) -> dict:
     return skill_experts
 
 
-def get_cmnt_skills(publication) -> list:
+def get_cmnt_skills_from_pub(publication) -> list:
     """
     returns non trivial words of publication as skills packed in set
     used to get skills of an expert
@@ -70,7 +69,7 @@ def get_cmnt_skills(publication) -> list:
     return sorted(lst)
 
 
-def get_dblp_skills(publication) -> list:
+def get_dblp_skills_from_pub(publication) -> list:
     """
     returns non trivial words of publication as skills packed in set
     used to get skills of an expert
@@ -348,7 +347,7 @@ class DBLP_Data:
                 author_id_skills_dict[author] = list()
                 for pub in author_id_pubs_dict[author]:
                     pub_s += " " + dblp_title_id_name_dict[pub]
-                for skill in get_dblp_skills(pub_s):
+                for skill in get_dblp_skills_from_pub(pub_s):
                     skill_set.add(skill)
                     author_id_skills_dict[author].append(skill)
             skill_id = 1
@@ -382,7 +381,7 @@ class DBLP_Data:
                 author_id_skill_ids_dict[author] = list()
                 for pub_id in author_id_pubs_dict[author]:
                     pub_s += " " + dblp_title_id_name_dict[pub_id]
-                    all_skills = get_cmnt_skills(pub_s)
+                    all_skills = get_cmnt_skills_from_pub(pub_s)
                     for skill in all_skills:
                         if skill in dblp_skill_name_id_dict:
                             author_id_skill_ids_dict[author].append(dblp_skill_name_id_dict[skill])
@@ -438,6 +437,31 @@ class DBLP_Data:
         nx.write_gml(largest_cc, "../dblp-" + self.year + "/" + network + ".gml")
         # plt.show()
 
+    def alpha_diversity(self):
+        """
+        returns Shannon entropy
+        :param l_graph:
+        :return:
+        """
+        import math
+        for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
+                        "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+            graph = nx.read_gml("../dblp-" + self.year + "/" + network + ".gml")
+            open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "w").close()
+            for node in graph.nodes:
+                if len(graph.nodes[node]) > 0:
+                    skl_count = graph.nodes[node]["skills"].split(",")
+                    simpson_d = 1 / len(skl_count)
+                    simpson_inv = 1 / simpson_d
+                    gini_simpson_div = 1 - simpson_d
+                    shannon_alpha = math.log(len(skl_count))
+                    record = str(node)
+                    record += "\t" + str(graph.nodes[node]["name"])
+                    record += "\t" + str(round(shannon_alpha, 3))
+                    record += "\t" + str(round(simpson_inv, 3))
+                    record += "\t" + str(round(gini_simpson_div, 3)) + "\n"
+                    open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "a").write(record)
+
     def generate_community_tasks(self, community, ntasks) -> None:
         """
         This method called once, generates community tasks 1700 and 17
@@ -489,8 +513,7 @@ class DBLP_Data:
                             open(file_path, "a").write("\n")
                         all_tasks.clear()
 
-    @staticmethod
-    def get_community_skills_set(graph) -> set:
+    def get_community_skills_set(self, graph) -> set:
         """
         skill set of community is returned
         :param graph:
@@ -519,7 +542,7 @@ class DBLP_Data:
         task_skills = set()
         graph_skills = set()
         skill_name_id_dict = dict()
-        with open("../dblp-" + self.year + "/dblp-skills.txt", "r") as file:
+        with open("../dblp-" + self.year + "/db-skills.txt", "r") as file:
             for line in file:
                 line_words = line.strip("\n").split("\t")
                 skill_name_id_dict[line_words[1]] = line_words[0]
@@ -533,6 +556,35 @@ class DBLP_Data:
         lst = list(task_skills.intersection(graph_skills))
         return sorted(lst)
 
+    def analysis(self):
+        """
+        skills covered by 2 hop neighbourhood of high collaborating nodes is 1.0
+        :return:
+        """
+        import utilities
+        import networkx as nx
+        year = "2015"
+        # dblp_data = DBLP_Data(myear)
+        # for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
+        #             "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+        l_graph = nx.read_gml("../dblp-" + year + "/pods.gml")
+        avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
+        hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
+                     d >= avg_degree], reverse=True)
+        hcn = set()
+        for n in hc:
+            hcn.update(utilities.within_k_nbrs(l_graph, n, 2))
+        hcs = self.get_community_skills_set(l_graph.subgraph(hcn).copy())
+        cs = self.get_community_skills_set(l_graph)
+        print(len(hcs) / len(cs))
+
+    def write_statistics(self):
+        """
+        write technical statistics to network_tech_stats.txt
+        :return:
+        """
+        pass
+
 
 def multiprocessing_func(l_txt):
     nyear = "2015"
@@ -544,24 +596,29 @@ def multiprocessing_func(l_txt):
     dblp_dt.generate_community_tasks(l_txt, 17)
     dblp_dt.generate_community_tasks(l_txt, 1700)
 
+
 if __name__ == '__main__':
     start_time = time.time()
+    import networkx as nx
+
     myear = "2015"
     mnetwork = "dblp"
     dblp_data = DBLP_Data(myear)
-    dblp_data.write_authors_info(mnetwork)
-    dblp_data.write_titles_info(mnetwork)
-    dblp_data.write_skills_info(mnetwork)
-    dblp_data.build_graph(mnetwork)
-    dblp_data.generate_community_tasks(mnetwork, 17)
-    dblp_data.generate_community_tasks(mnetwork, 1700)
-    processes = []
-    for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
-                "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
-        # for txt in ["pods"]:
-        p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
-        processes.append(p)
-        p.start()
-    for process in processes:
-        process.join()
+    # dblp_data.write_authors_info(mnetwork)
+    # dblp_data.write_titles_info(mnetwork)
+    # dblp_data.write_skills_info(mnetwork)
+    # dblp_data.build_graph(mnetwork)
+    # dblp_data.generate_community_tasks(mnetwork, 17)
+    # dblp_data.generate_community_tasks(mnetwork, 1700)
+    # processes = []
+    # for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
+    #             "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+    #     # for txt in ["pods"]:
+    #     p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
+    #     processes.append(p)
+    #     p.start()
+    # for process in processes:
+    #     process.join()
+    # dblp_data.analysis()
+    dblp_data.alpha_diversity()
     tqdm.write('Time taken = {} seconds'.format(time.time() - start_time))

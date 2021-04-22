@@ -13,7 +13,10 @@ class Team:
         if len(self.experts) == 0:
             self.record = "Team Not Yet Formed"
         for expert in self.experts:
-            self.record += " " + expert + ":" + ",".join(self.skills[expert])
+            if expert in self.skills:
+                self.record += " " + expert + ":" + ",".join(self.skills[expert])
+            else:
+                self.record += " " + expert + ":" + ""
         return self.record
 
     def cardinality(self):
@@ -165,6 +168,10 @@ class Team:
         tot_skls = set()
         for node in self.experts:
             tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
+        task = set()
+        for expert in self.skills:
+            for skill in self.skills[expert]:
+                task.add(skill)
         for skill in tot_skls:
             cn = 0
             for node in self.experts:
@@ -223,6 +230,10 @@ class Team:
         tot_skls = set()
         for node in self.experts:
             tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
+        task = set()
+        for expert in self.skills:
+            for skill in self.skills[expert]:
+                task.add(skill)
         for skill in tot_skls:
             cn = 0
             for node in self.experts:
@@ -245,11 +256,26 @@ class Team:
             return round(1 - (self.simpson_gamma_task_density(l_graph)), 3)
 
 
-if __name__ == "__main__":
-    team = Team()
-    import sys
+def similarity_teams():
+    year = "2015"
+    network = "vldb"
+    algori1 = "tfs"
+    algori2 = "rfs"
+    with open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori1 + "-teams.txt", "r") as file1, \
+            open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori2 + "-teams.txt", "r") as file2:
+        for line1, line2 in zip(file1, file2):
+            experts1 = set(line1.strip("\n").split(","))
+            experts2 = set(line2.strip("\n").split(","))
+            print(",".join(sorted(experts2.intersection(experts1))), end="|")
+            # print(",".join(total.difference(common)), end="\t")
+            print(",".join(sorted(experts1.difference(experts2))), end="|")
+            print(",".join(sorted(experts2.difference(experts1))))
 
-    print("memory required in bytes : " + str(team.__sizeof__()))  # sizeof
-    print("memory required in bytes with overhead : " + str(sys.getsizeof(team)))  # sizeof with overhead
-    print("string " + team.__str__())
-    print("cardinality " + str(team.cardinality()))
+
+if __name__ == "__main__":
+    similarity_teams()
+    # team = Team()
+    # print("memory required in bytes : " + str(team.__sizeof__()))  # sizeof
+    # print("memory required in bytes with overhead : " + str(sys.getsizeof(team)))  # sizeof with overhead
+    # print("string " + team.__str__())
+    # print("cardinality " + str(team.cardinality()))
