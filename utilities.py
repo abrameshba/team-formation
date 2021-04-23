@@ -89,3 +89,32 @@ def show_mygraph(d_graph):
     labels = nx.get_edge_attributes(d_graph, 'weight')
     nx.draw_networkx_edge_labels(d_graph, pos, edge_labels=labels)
     plt.show()
+
+# Ref : https://stackoverflow.com/questions/268272/getting-key-with-maximum-value-in-dictionary
+def key_with_max_val(dictnry):
+    """ a) create a list of the dict's keys and values;
+        b) return the key with the max value"""
+    v = list(dictnry.values())
+    k = list(dictnry.keys())
+    return k[v.index(max(v))]
+
+    def get_diameter_nodes(self, l_graph):
+        """
+        return diameter of graph formed by team
+        diam(X) := max{sp_{X}(u,v) | u,v ∈ X}.
+        :param l_graph:
+        :return:
+        """
+        import networkx as nx
+        import utilities
+        # t_graph = self.get_team_graph(l_graph)
+        if nx.number_of_nodes(l_graph) < 2:
+            return 0
+        else:
+            spl = dict()
+            for nd in l_graph.nodes:
+                spl[nd] = nx.single_source_dijkstra_path_length(l_graph, nd)
+            eccentrct = nx.eccentricity(l_graph, sp=spl)
+            sour = utilities.key_with_max_val(eccentrct)  # source
+            dest = utilities.key_with_max_val(nx.single_source_dijkstra(l_graph, sour)[0])  # destination
+            return nx.dijkstra_path(l_graph, sour, dest)

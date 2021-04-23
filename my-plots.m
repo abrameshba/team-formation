@@ -1,7 +1,7 @@
 #!/usr/bin/gnuplot -persist
 reset
 #set title "Degree distribution" font ",14" textcolor rgbcolor "royalblue"
-set ylabel "Shannon team gamma diversity"
+set ylabel "Shannon team diversity"
 set xlabel "Task size"
 #set logscale xy
 set terminal postscript eps enhanced color
@@ -18,7 +18,7 @@ plot    '../dblp-2015/vldb-17-tasks-0-tfs-results.txt' using 1:9 with line linet
 
 reset
 #set title "Degree distribution" font ",14" textcolor rgbcolor "royalblue"
-set ylabel "Shannon task gamma diversity"
+set ylabel "Shannon task diversity"
 set xlabel "Task size"
 #set logscale xy
 set terminal postscript eps enhanced color

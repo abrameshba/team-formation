@@ -69,7 +69,7 @@ class Team:
             for nd in t_graph.nodes:
                 sp[nd] = nx.single_source_dijkstra_path_length(t_graph, nd)
             e = nx.eccentricity(t_graph, sp=sp)
-            return round(nx.diameter(t_graph, e), 3)
+            return round(nx.diameter(t_graph, e), 2)
 
     def radius(self, l_graph) -> float:
         """
@@ -93,7 +93,7 @@ class Team:
                 plt.show()
                 msg = "Found infinite path length because the graph is not" " connected"
                 raise nx.NetworkXError(msg) from eccent
-            return round(nx.radius(t_graph, eccent), 3)
+            return round(nx.radius(t_graph, eccent), 2)
 
     def sum_distance(self, l_graph, task) -> float:
         """
@@ -179,7 +179,7 @@ class Team:
                     cn += 1
             prob = cn / len(self.experts)
             shannon_sum += prob * math.log(prob)
-        return round(((-1 * shannon_sum) / len(tot_skls)), 3)
+        return round(((-1 * shannon_sum) / len(tot_skls)), 2)
 
     def shannon_gamma_task_diversity(self, l_graph):
         """
@@ -200,7 +200,7 @@ class Team:
                     cn += 1
             prob = cn / len(self.experts)
             shannon_sum += (prob * math.log(prob))
-        return round(((-1 * shannon_sum) / len(task)), 3)
+        return round(((-1 * shannon_sum) / len(task)), 2)
 
     def simpson_gamma_task_density(self, l_graph):
         """
@@ -219,7 +219,7 @@ class Team:
                     cn += 1
             prob = cn / len(self.experts)
             simpson_sum += pow(prob, 2)
-        return round(simpson_sum / len(task), 3)
+        return round(simpson_sum / len(task), 2)
 
     def simpson_gamma_team_density(self, l_graph):
         """
@@ -241,40 +241,49 @@ class Team:
                     cn += 1
             prob = cn / len(self.experts)
             simpson_sum += pow(prob, 2)
-        return round(simpson_sum / len(tot_skls), 3)
+        return round(simpson_sum / len(tot_skls), 2)
 
     def simpson_diversity(self, l_graph, bool_team):
         if bool_team:
-            return round(1 / (self.simpson_gamma_team_density(l_graph)), 3)
+            return round(1 / (self.simpson_gamma_team_density(l_graph)), 2)
         else:
-            return round(1 / (self.simpson_gamma_task_density(l_graph)), 3)
+            return round(1 / (self.simpson_gamma_task_density(l_graph)), 2)
 
     def gini_simpson_diversity(self, l_graph, bool_team):
         if bool_team:
-            return round(1 - (self.simpson_gamma_team_density(l_graph)), 3)
+            return round(1 - (self.simpson_gamma_team_density(l_graph)), 2)
         else:
-            return round(1 - (self.simpson_gamma_task_density(l_graph)), 3)
+            return round(1 - (self.simpson_gamma_task_density(l_graph)), 2)
 
 
 def similarity_teams():
     year = "2015"
     network = "vldb"
-    algori1 = "tfs"
-    algori2 = "rfs"
+    algori1 = "rfs"
+    algori2 = "bsd"
     with open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori1 + "-teams.txt", "r") as file1, \
             open("../dblp-" + year + "/" + network + "-17-tasks-0-" + algori2 + "-teams.txt", "r") as file2:
         for line1, line2 in zip(file1, file2):
             experts1 = set(line1.strip("\n").split(","))
             experts2 = set(line2.strip("\n").split(","))
-            print(",".join(sorted(experts2.intersection(experts1))), end="|")
-            # print(",".join(total.difference(common)), end="\t")
-            print(",".join(sorted(experts1.difference(experts2))), end="|")
-            print(",".join(sorted(experts2.difference(experts1))))
+            print(",".join(sorted(experts2.intersection(experts1))) + " | " +
+                  ",".join(sorted(experts1.difference(experts2))) + " | " +
+                  ",".join(sorted(experts2.difference(experts1))))
+            print(str(len(experts2.intersection(experts1))) + " | " +
+                  str(len(experts1.difference(experts2))) + " | " +
+                  str(len(experts2.difference(experts1))))
 
 
 if __name__ == "__main__":
-    similarity_teams()
-    # team = Team()
+    year = "2015"
+    network = "vldb"
+    import networkx as nx
+
+    graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
+    from Team import Team
+
+    team = Team()
+    print(team.get_diameter_nodes(graph))
     # print("memory required in bytes : " + str(team.__sizeof__()))  # sizeof
     # print("memory required in bytes with overhead : " + str(sys.getsizeof(team)))  # sizeof with overhead
     # print("string " + team.__str__())
