@@ -2,7 +2,7 @@ class Team:
 
     def __init__(self):
         self.experts = set()
-        self.expert_skills = dict() # dictionary of list of skills representing by an expert to the Team
+        self.expert_skills = dict()     # dictionary of list of skills representing by an expert to the Team
         self.matched_skills = dict()    # dictionary of list of skills matched with task of an expert
         self.record = ""
         self.leader = ""
