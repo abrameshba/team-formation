@@ -4,17 +4,17 @@ def diversity_toy():
     t1 = Team()
     task = ["s1", "s2", "s3", "s4"]
     t1.experts = {"v1", "v2", "v3", "v4"}
-    t1.skills = {"v1": ["s1", "s2", "s3", "s4"], "v2": ["s1", "s2", "s3"], "v3": ["s1", "s2"], "v4": ["s1"]}
+    t1.expert_skills = {"v1": ["s1", "s2", "s3", "s4"], "v2": ["s1", "s2", "s3"], "v3": ["s1", "s2"], "v4": ["s1"]}
     t2 = Team()
     t2.experts = {"v5", "v6", "v7", "v8"}
-    t2.skills = {"v5": ["s1", "s2", "s3"], "v6": ["s1", "s2", "s4"], "v7": ["s1", "s3", "s4"],
+    t2.expert_skills = {"v5": ["s1", "s2", "s3"], "v6": ["s1", "s2", "s4"], "v7": ["s1", "s3", "s4"],
                  "v8": ["s2", "s3", "s4"]}
     t3 = Team()
     t3.experts = {"v9", "v10", "v11", "v12"}
-    t3.skills = {"v9": ["s1", "s4"], "v10": ["s2", "s3"], "v11": ["s1", "s3"], "v12": ["s2", "s4"]}
+    t3.expert_skills = {"v9": ["s1", "s4"], "v10": ["s2", "s3"], "v11": ["s1", "s3"], "v12": ["s2", "s4"]}
     t4 = Team()
     t4.experts = {"v13", "v14", "v15", "v16"}
-    t4.skills = {"v13": ["s1"], "v14": ["s2"], "v15": ["s3"], "v16": ["s4"]}
+    t4.expert_skills = {"v13": ["s1"], "v14": ["s2"], "v15": ["s3"], "v16": ["s4"]}
     import networkx as nx
     graph1 = nx.Graph()
     graph2 = nx.Graph()

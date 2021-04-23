@@ -21,11 +21,11 @@ def rarestfirst(l_graph, l_task):
             team = Team()
             team.leader = candidate
             team.experts.add(candidate)
-            if candidate not in team.skills.keys():
-                team.skills[candidate] = list()
-                team.skills[candidate].append(rare_skill)
+            if candidate not in team.expert_skills.keys():
+                team.expert_skills[candidate] = list()
+                team.expert_skills[candidate].append(rare_skill)
             else:
-                team.skills[candidate].append(rare_skill)
+                team.expert_skills[candidate].append(rare_skill)
             for l_skill in l_task:
                 closest_expert = ""
                 if rare_skill != l_skill:
@@ -43,11 +43,11 @@ def rarestfirst(l_graph, l_task):
                             pass
                     if len(closest_expert) > 0:
                         team.experts.add(closest_expert)
-                        if closest_expert not in team.skills:
-                            team.skills[closest_expert] = list()
-                            team.skills[closest_expert].append(l_skill)
+                        if closest_expert not in team.expert_skills:
+                            team.expert_skills[closest_expert] = list()
+                            team.expert_skills[closest_expert].append(l_skill)
                         else:
-                            team.skills[closest_expert].append(l_skill)
+                            team.expert_skills[closest_expert].append(l_skill)
             team_graph = team.get_team_graph(l_graph)
             dd = team.diameter(team_graph)
             # print(team)
@@ -76,11 +76,11 @@ def best_sum_distance(l_graph, l_task):
             team = Team()
             team.leader = candidate
             team.experts.add(candidate)
-            if candidate not in team.skills:
-                team.skills[candidate] = list()
-                team.skills[candidate].append(skill_i)
+            if candidate not in team.expert_skills:
+                team.expert_skills[candidate] = list()
+                team.expert_skills[candidate].append(skill_i)
             else:
-                team.skills[candidate].append(skill_i)
+                team.expert_skills[candidate].append(skill_i)
             for skill_j in l_task:
                 if skill_i != skill_j:
                     min_dis = 100
@@ -93,11 +93,11 @@ def best_sum_distance(l_graph, l_task):
                                 closest_expert = (expert + ".")[:-1]
                     if len(closest_expert) > 0:
                         team.experts.add(closest_expert)
-                        if closest_expert not in team.skills:
-                            team.skills[closest_expert] = list()
-                            team.skills[closest_expert].append(skill_j)
+                        if closest_expert not in team.expert_skills:
+                            team.expert_skills[closest_expert] = list()
+                            team.expert_skills[closest_expert].append(skill_j)
                         else:
-                            team.skills[closest_expert].append(skill_j)
+                            team.expert_skills[closest_expert].append(skill_j)
             sum_dist = team.sum_distance(l_graph, l_task)
             # print(team)
             if sum_dist < least_sum_distance:
@@ -123,46 +123,47 @@ def tfs(l_graph, l_task):  # twice of average degree
                  len(set(l_graph.nodes[n]["skills"].split(",")).intersection(set(l_task))) > 0],
                 reverse=True)
     best_team = Team()
-    team = Team()
+
     best_ldr_distance = 1000
     # expert_skills = utilities.get_expert_skills_dict(l_graph)
     skill_experts = dblp_ds.get_skill_experts_dict(l_graph)
-    random_expert_added = 0
     # print(hc)
     for c_node in hc:
         task_copy = set(l_task)
         hops = 1
+        random_experts = set()
+        team = Team()
         while hops < 3 and len(task_copy) > 0:
-            team = Team()
+            team.clean_it()
+            for skill in l_task:
+                team.task.add(skill)
             task_copy.update(l_task)
-            random_expert_added = 0
             team.leader = c_node
             skill_cover = set(task_copy).intersection(
                 set(l_graph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
             team.experts.add(c_node)
-            if c_node not in team.skills:
-                team.skills[c_node] = list()
-                for skill in skill_cover:
-                    team.skills[c_node].append(skill)
-            else:
-                for skill in skill_cover:
-                    team.skills[c_node].append(skill)
-            for skill in skill_cover:
-                if skill in task_copy:
-                    task_copy.remove(skill)
+            if len(skill_cover) > 0:
+                if c_node in team.expert_skills:
+                    for skill in skill_cover:
+                        team.expert_skills[c_node].append(skill)
+                else:
+                    team.expert_skills[c_node] = list()
+                    for skill in skill_cover:
+                        team.expert_skills[c_node].append(skill)
             task_copy.difference_update(skill_cover)
             hop_nodes = utilities.within_k_nbrs(l_graph, c_node, hops)
-            nbrhd = []
+            nbrhd = list()
             for node in hop_nodes:
                 if len(l_graph.nodes[node]) >= 2:
-                    skills = set(l_graph.nodes[node]["skills"].split(",")).intersection(l_task)
-                    dis = nx.dijkstra_path_length(l_graph, c_node, node, weight="weight")
-                    nbrhd.append([node, skills, dis])
+                    skills = set(l_graph.nodes[node]["skills"].split(",")).intersection(task_copy)
+                    if len(skills) > 0:
+                        dis = nx.dijkstra_path_length(l_graph, c_node, node, weight="weight")
+                        nbrhd.append([node, skills, dis])
             nbrhd.sort(key=lambda elem: (-len(elem[1]), elem[2]))  # sort neighbor hood max skills and min distance
             for nbr in nbrhd:
                 if len(nbr[1].intersection(task_copy)) > 0:
                     team.experts.add(nbr[0])
-                    team.skills[nbr[0]] = nbr[1].intersection(task_copy)
+                    team.expert_skills[nbr[0]] = nbr[1].intersection(task_copy)
                     task_copy.difference_update(nbr[1].intersection(task_copy))
             hops += 1
         tsk_lst = list(task_copy)
@@ -177,23 +178,19 @@ def tfs(l_graph, l_task):  # twice of average degree
                         min_dis = dis
                         close_expert = (expert + ".")[:-1]
             team.experts.add(close_expert)  # first element of neighbor hood
-            if close_expert not in team.skills:
-                team.skills[close_expert] = list()
-                team.skills[close_expert].append(skl)
+            if close_expert not in team.expert_skills:
+                team.expert_skills[close_expert] = list()
+                team.expert_skills[close_expert].append(skl)
             else:
-                team.skills[close_expert].append(skl)
+                team.expert_skills[close_expert].append(skl)
             tsk_lst.remove(skl)
-            random_expert_added += 1
-        if len(tsk_lst) > 0:
-            continue
-        elif len(tsk_lst) == 0:
-            # print(i, team)
+            random_experts.add(close_expert)
+            team.random_experts = random_experts
+        if team.is_formed():
             ld = team.leader_distance(l_graph)
             if best_ldr_distance > ld:
                 best_ldr_distance = ld
                 best_team = team
-        else:
-            pass
     return best_team
 
 
@@ -231,40 +228,41 @@ def tfr(l_graph, l_task):  # twice of average degree
             skill_cover = set(task_copy).intersection(
                 set(l_graph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
             team.experts.add(c_node)
-            if c_node not in team.skills:
-                team.skills[c_node] = list()
+            if c_node not in team.expert_skills:
+                team.expert_skills[c_node] = list()
                 for skill in skill_cover:
-                    team.skills[c_node].append(skill)
+                    team.expert_skills[c_node].append(skill)
             else:
                 for skill in skill_cover:
-                    team.skills[c_node].append(skill)
+                    team.expert_skills[c_node].append(skill)
             for skill in skill_cover:
                 if skill in task_copy:
                     task_copy.remove(skill)
             task_copy.difference_update(skill_cover)
             hop_nodes = utilities.within_k_nbrs(l_graph, c_node, hops)
-            nbrhd = []
+            nbrhd = list()
             for node in hop_nodes:
                 if len(l_graph.nodes[node]) >= 2:
                     skills = set(l_graph.nodes[node]["skills"].split(",")).intersection(l_task)
-                    dis = nx.dijkstra_path_length(l_graph, c_node, node, weight="weight")
-                    nbrhd.append([node, skills, dis])
+                    if len(skills) > 0:
+                        dis = nx.dijkstra_path_length(l_graph, c_node, node, weight="weight")
+                        nbrhd.append([node, skills, dis])
             nbrhd.sort(key=lambda elem: (-len(elem[1]), elem[2]))  # sort neighbor hood max skills and min distance
             for nbr in nbrhd:
                 if len(nbr[1].intersection(task_copy)) > 0:
                     team.experts.add(nbr[0])
-                    team.skills[nbr[0]] = nbr[1].intersection(task_copy)
+                    team.expert_skills[nbr[0]] = nbr[1].intersection(task_copy)
                     task_copy.difference_update(nbr[1].intersection(task_copy))
             hops += 1
         while len(task_copy) > 0:
             skl = random.choice(task_copy)
             random_expert = random.choice(skill_experts[skl])
             team.experts.add(random_expert)
-            if random_expert not in team.skills:
-                team.skills[random_expert] = list()
-                team.skills[random_expert].append(skl)
+            if random_expert not in team.expert_skills:
+                team.expert_skills[random_expert] = list()
+                team.expert_skills[random_expert].append(skl)
             else:
-                team.skills[random_expert].append(skl)
+                team.expert_skills[random_expert].append(skl)
             task_copy.remove(skl)
             random_expert_added += 1
         if len(task_copy) > 0:
@@ -301,11 +299,11 @@ def best_leader_distance(l_graph, l_task):
         skill_cover = set(l_task).intersection(
             set(l_graph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
         for skill in skill_cover:
-            if candidate not in team.skills:
-                team.skills[candidate] = list()
-                team.skills[candidate].append(skill)
+            if candidate not in team.expert_skills:
+                team.expert_skills[candidate] = list()
+                team.expert_skills[candidate].append(skill)
             else:
-                team.skills[candidate].append(skill)
+                team.expert_skills[candidate].append(skill)
         r_skills = set(l_task).difference(skill_cover)
         for skill in r_skills:
             min_dis = 100
@@ -318,11 +316,11 @@ def best_leader_distance(l_graph, l_task):
                         closest_expert = (expert + ".")[:-1]
             if len(closest_expert) > 0:
                 team.experts.add(closest_expert)
-                if closest_expert not in team.skills:
-                    team.skills[closest_expert] = list()
-                    team.skills[closest_expert].append(skill)
+                if closest_expert not in team.expert_skills:
+                    team.expert_skills[closest_expert] = list()
+                    team.expert_skills[closest_expert].append(skill)
                 else:
-                    team.skills[closest_expert].append(skill)
+                    team.expert_skills[closest_expert].append(skill)
         # print(team)
         cld = team.leader_skill_distance(l_graph, l_task)
         if ldr_distance > cld:
@@ -336,7 +334,6 @@ def min_diam_sol(l_graph, l_task, hops) -> (dict, str):
     Return team generated by Minimum diameter solution algorithm
     :param l_graph:
     :param l_task:
-    :param user:
     :param hops:
     :return:
     """
@@ -344,13 +341,15 @@ def min_diam_sol(l_graph, l_task, hops) -> (dict, str):
     from Team import Team
     best_team = Team()
     max_dia = 100
-    skill_id_name_dict = dict()
-    with open("../dblp-2015/db-skills.txt", "r") as file:
-        for line in file:
-            line_words = line.strip("\n").split()
-            skill_id_name_dict[line_words[0]] = line_words[1]
+
+    # skill_id_name_dict = dict()
+    # with open("../dblp-2015/db-skills.txt", "r") as file:
+    #     for line in file:
+    #         line_words = line.strip("\n").split()
+    #         skill_id_name_dict[line_words[0]] = line_words[1]
     diamtr_nodes = utilities.get_diameter_nodes(l_graph)
     for user in tqdm(diamtr_nodes, total=len(diamtr_nodes)):
+        team = Team()
         ldnodes = list()
         for node in l_graph.nodes:
             if nx.dijkstra_path_length(l_graph, user, node) <= hops:
@@ -359,8 +358,7 @@ def min_diam_sol(l_graph, l_task, hops) -> (dict, str):
                 pass
         pgraph = nx.subgraph(l_graph, ldnodes).copy()  # processed graph excluding nodes hops away from user
         # from networkx.algorithms import bipartite
-        radius = 0
-        for radius in range(hops):
+        for radius in range(1, hops + 1):
             hop_nodes = utilities.within_k_nbrs(pgraph, user, radius)
             hop_skill_cover = set()
             for node in hop_nodes:
@@ -378,37 +376,39 @@ def min_diam_sol(l_graph, l_task, hops) -> (dict, str):
                 #             bpt.add_edge(skill_id_name_dict[skill], node1, weight=1)
                 # nx.draw(bpt, with_labels=True)
                 # plt.show()
+                c_task = set(l_task)
+                team.leader = user
+                team.experts.add(user)
+                skill_cover = set(l_task).intersection(
+                    set(pgraph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
+                for skill in skill_cover:
+                    if len(skill_cover) > 0 and user not in team.expert_skills:
+                        team.expert_skills[user] = list()
+                        team.expert_skills[user].append(skill)
+                    else:
+                        team.expert_skills[user].append(skill)
+                c_task.difference_update(skill_cover)
+                for hop in range(1, radius + 1):
+                    hop_nodes = utilities.at_k_nbrs(pgraph, user, hop)
+                    nbrhd = list()
+                    for node in hop_nodes:
+                        if len(pgraph.nodes[node]) >= 2:
+                            skills = set(pgraph.nodes[node]["skills"].split(",")).intersection(l_task)
+                            if len(skills):
+                                dis = nx.dijkstra_path_length(pgraph, user, node, weight="weight")
+                                nbrhd.append([node, skills, dis])
+                    nbrhd.sort(
+                        key=lambda elem: (-len(elem[1]), elem[2]))  # sort neighbor hood max skills and min distance
+                    for nbr in nbrhd:
+                        if len(nbr[1].intersection(c_task)) > 0:
+                            team.experts.add(nbr[0])
+                            team.expert_skills[nbr[0]] = nbr[1].intersection(c_task)
+                            c_task.difference_update(nbr[1].intersection(c_task))
                 break
-        team = Team()
-        c_task = set(l_task)
-        team.leader = user
-        team.experts.add(user)
-        skill_cover = set(l_task).intersection(
-            set(pgraph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
-        for skill in skill_cover:
-            if user not in team.skills:
-                team.skills[user] = list()
-                team.skills[user].append(skill)
-            else:
-                team.skills[user].append(skill)
-        c_task.difference_update(set(pgraph.nodes[user]["skills"]).intersection(l_task))
-        for hop in range(radius):
-            hop_nodes = utilities.at_k_nbrs(pgraph, user, hop)
-            nbrhd = []
-            for node in hop_nodes:
-                if len(pgraph.nodes[node]) >= 2:
-                    skills = set(pgraph.nodes[node]["skills"].split(",")).intersection(l_task)
-                    dis = nx.dijkstra_path_length(pgraph, user, node, weight="weight")
-                    nbrhd.append([node, skills, dis])
-            nbrhd.sort(key=lambda elem: (-len(elem[1]), elem[2]))  # sort neighbor hood max skills and min distance
-            for nbr in nbrhd:
-                if len(nbr[1].intersection(c_task)) > 0:
-                    team.experts.add(nbr[0])
-                    team.skills[nbr[0]] = nbr[1].intersection(c_task)
-                    c_task.difference_update(nbr[1].intersection(c_task))
         cld = team.diameter(l_graph)
-        if cld < max_dia:
+        if 0 < cld < max_dia and team.is_formed():
             max_dia = cld
+            team.formed = team.is_formed()
             best_team = team
     return best_team
 
@@ -423,4 +423,4 @@ if __name__ == "__main__":
     graph = nx.read_gml("../dblp-2015/vldb.gml")
     task = dblp_dt.get_task_from_title_graph(graph,
                                              "Novel Approaches in Query Processing for Moving Object Trajectories")
-    print(min_diam_sol(graph, task, 5))  # h = 5
+    print(tfs(graph, task))  # h = 5

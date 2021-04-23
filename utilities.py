@@ -98,7 +98,7 @@ def key_with_max_val(dictnry):
     k = list(dictnry.keys())
     return k[v.index(max(v))]
 
-def get_diameter_nodes(self, l_graph):
+def get_diameter_nodes(l_graph):
     """
     return diameter of graph formed by team
     diam(X) := max{sp_{X}(u,v) | u,v ∈ X}.
@@ -106,7 +106,6 @@ def get_diameter_nodes(self, l_graph):
     :return:
     """
     import networkx as nx
-    import utilities
     # t_graph = self.get_team_graph(l_graph)
     if nx.number_of_nodes(l_graph) < 2:
         return 0
@@ -115,6 +114,6 @@ def get_diameter_nodes(self, l_graph):
         for nd in l_graph.nodes:
             spl[nd] = nx.single_source_dijkstra_path_length(l_graph, nd)
         eccentrct = nx.eccentricity(l_graph, sp=spl)
-        sour = utilities.key_with_max_val(eccentrct)  # source
-        dest = utilities.key_with_max_val(nx.single_source_dijkstra(l_graph, sour)[0])  # destination
+        sour = key_with_max_val(eccentrct)  # source
+        dest = key_with_max_val(nx.single_source_dijkstra(l_graph, sour)[0])  # destination
         return nx.dijkstra_path(l_graph, sour, dest)

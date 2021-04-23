@@ -2,9 +2,19 @@ class Team:
 
     def __init__(self):
         self.experts = set()
-        self.skills = dict()
+        self.expert_skills = dict() # dictionary of list of skills representing by an expert to the Team
+        self.matched_skills = dict()    # dictionary of list of skills matched with task of an expert
         self.record = ""
         self.leader = ""
+        self.formed = False
+        self.task = set()
+        self.random_experts = set()
+
+    def is_formed(self):
+        all_skills = set()
+        for expert in self.expert_skills:
+            all_skills.update(set(self.expert_skills[expert]))
+        return len(all_skills) == len(self.task)
 
     def __str__(self):  # real signature unknown
         """ Return str(self). """
@@ -12,12 +22,19 @@ class Team:
         self.record = ""
         if len(self.experts) == 0:
             self.record = "Team Not Yet Formed"
-        for expert in self.experts:
-            if expert in self.skills:
-                self.record += " " + expert + ":" + ",".join(self.skills[expert])
-            else:
-                self.record += " " + expert + ":" + ""
+        else:
+            self.record = ":".join(self.experts)
         return self.record
+
+    def clean_it(self):
+        self.experts = set()
+        self.expert_skills = dict() # dictionary of list of skills representing by an expert to the Team
+        self.matched_skills = dict()    # dictionary of list of skills matched with task of an expert
+        self.record = ""
+        self.leader = ""
+        self.formed = False
+        self.task = set()
+        self.random_experts = set()
 
     def cardinality(self):
         return len(self.experts)
@@ -110,9 +127,9 @@ class Team:
             for skill_j in task:
                 if skill_i != skill_j:
                     for member in self.experts:
-                        if skill_i in self.skills[member]:
+                        if skill_i in self.expert_skills[member]:
                             expert_i = member
-                        if skill_j in self.skills[member]:
+                        if skill_j in self.expert_skills[member]:
                             expert_j = member
                     if expert_i in l_graph and expert_j in l_graph and nx.has_path(l_graph, expert_i, expert_j):
                         sd += nx.dijkstra_path_length(l_graph, expert_i, expert_j, weight="weight")
@@ -132,10 +149,10 @@ class Team:
         if len(self.experts) < 2:
             return 0
         else:
-            for l_skill in self.skills[self.leader]:
+            for l_skill in self.expert_skills[self.leader]:
                 for skill in l_task:
                     for member in self.experts:
-                        if l_skill != skill and member != self.leader and skill in self.skills[member]:
+                        if l_skill != skill and member != self.leader and skill in self.expert_skills[member]:
                             if nx.has_path(l_graph, self.leader, member):
                                 ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="weight")
         return round(ld, 3)
@@ -169,8 +186,8 @@ class Team:
         for node in self.experts:
             tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
         task = set()
-        for expert in self.skills:
-            for skill in self.skills[expert]:
+        for expert in self.expert_skills:
+            for skill in self.expert_skills[expert]:
                 task.add(skill)
         for skill in tot_skls:
             cn = 0
@@ -190,8 +207,8 @@ class Team:
         import math
         shannon_sum = 0
         task = set()
-        for expert in self.skills:
-            for skill in self.skills[expert]:
+        for expert in self.expert_skills:
+            for skill in self.expert_skills[expert]:
                 task.add(skill)
         for skill in task:
             cn = 0
@@ -209,8 +226,8 @@ class Team:
         """
         simpson_sum = 0
         task = set()
-        for expert in self.skills:
-            for skill in self.skills[expert]:
+        for expert in self.expert_skills:
+            for skill in self.expert_skills[expert]:
                 task.add(skill)
         for skill in task:
             cn = 0
@@ -231,8 +248,8 @@ class Team:
         for node in self.experts:
             tot_skls.update(set(l_graph.nodes[node]["skills"].split(",")))
         task = set()
-        for expert in self.skills:
-            for skill in self.skills[expert]:
+        for expert in self.expert_skills:
+            for skill in self.expert_skills[expert]:
                 task.add(skill)
         for skill in tot_skls:
             cn = 0
