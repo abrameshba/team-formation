@@ -437,28 +437,28 @@ class DBLP_Data:
         nx.write_gml(largest_cc, "../dblp-" + self.year + "/" + network + ".gml")
         # plt.show()
 
-    def alpha_diversity(self):
+    def alpha_diversity(self, network):
         """
         returns Shannon entropy
         :return:
         """
         import math
-        for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod", "db"]:
-            graph = nx.read_gml("../dblp-" + self.year + "/" + network + ".gml")
-            open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "w").close()
-            for node in graph.nodes:
-                if len(graph.nodes[node]) > 0:
-                    skl_count = graph.nodes[node]["skills"].split(",")
-                    simpson_d = 1 / len(skl_count)
-                    simpson_inv = 1 / simpson_d
-                    gini_simpson_div = 1 - simpson_d
-                    shannon_alpha = math.log(len(skl_count))
-                    record = str(node)
-                    record += "\t" + str(graph.nodes[node]["name"])
-                    record += "\t" + str(round(shannon_alpha, 3))
-                    record += "\t" + str(round(simpson_inv, 3))
-                    record += "\t" + str(round(gini_simpson_div, 3)) + "\n"
-                    open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "a").write(record)
+        # for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod", "db"]:
+        graph = nx.read_gml("../dblp-" + self.year + "/" + network + ".gml")
+        open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "w").close()
+        for node in graph.nodes:
+            if len(graph.nodes[node]) > 0:
+                skl_count = graph.nodes[node]["skills"].split(",")
+                simpson_d = 1 / len(skl_count)
+                simpson_inv = 1 / simpson_d
+                gini_simpson_div = 1 - simpson_d
+                shannon_alpha = math.log(len(skl_count))
+                record = str(node)
+                record += "\t" + str(graph.nodes[node]["name"])
+                record += "\t" + str(round(shannon_alpha, 3))
+                record += "\t" + str(round(simpson_inv, 3))
+                record += "\t" + str(round(gini_simpson_div, 3)) + "\n"
+                open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "a").write(record)
 
     def generate_community_tasks(self, community, ntasks) -> None:
         """
@@ -705,19 +705,19 @@ if __name__ == '__main__':
     # dblp_dt.build_graph(l_txt)
     # dblp_dt.generate_community_tasks(l_txt, 17)
     # dblp_dt.generate_community_tasks(l_txt, 1700)
-    # dblp_data.analysis()
-    # dblp_data.alpha_diversity()
+    dblp_data.analysis(mnetwork)
+    dblp_data.alpha_diversity(mnetwork)
     open("../dblp-" + myear + "/stats-summary.txt", "w").close()
     dblp_data.write_statistics(mnetwork)
     for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
-        # dblp_data.write_authors_info(network)
-        # dblp_data.write_titles_info(network)
-        # dblp_data.write_skills_info(network)
-        # dblp_data.build_graph(network)
-        # dblp_data.generate_community_tasks(network, 17)
-        # dblp_data.generate_community_tasks(network, 1700)
-        # dblp_data.analysis()
-        # dblp_data.alpha_diversity()
+        dblp_data.write_authors_info(network)
+        dblp_data.write_titles_info(network)
+        dblp_data.write_skills_info(network)
+        dblp_data.build_graph(network)
+        dblp_data.generate_community_tasks(network, 17)
+        dblp_data.generate_community_tasks(network, 1700)
+        dblp_data.analysis(network)
+        dblp_data.alpha_diversity(network)
         dblp_data.write_statistics(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
