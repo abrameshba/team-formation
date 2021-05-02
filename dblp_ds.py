@@ -440,12 +440,10 @@ class DBLP_Data:
     def alpha_diversity(self):
         """
         returns Shannon entropy
-        :param l_graph:
         :return:
         """
         import math
-        for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
-                        "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+        for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod", "db"]:
             graph = nx.read_gml("../dblp-" + self.year + "/" + network + ".gml")
             open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "w").close()
             for node in graph.nodes:
@@ -556,18 +554,17 @@ class DBLP_Data:
         lst = list(task_skills.intersection(graph_skills))
         return sorted(lst)
 
-    def analysis(self):
+    def analysis(self, community):
         """
         skills covered by 2 hop neighbourhood of high collaborating nodes is 1.0
         :return:
         """
         import utilities
         import networkx as nx
-        year = "2015"
         # dblp_data = DBLP_Data(myear)
         # for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
         #             "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
-        l_graph = nx.read_gml("../dblp-" + year + "/pods.gml")
+        l_graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
         avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
         hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
                      d >= avg_degree], reverse=True)
@@ -578,12 +575,110 @@ class DBLP_Data:
         cs = self.get_community_skills_set(l_graph)
         print(len(hcs) / len(cs))
 
-    def write_statistics(self):
+    def write_statistics(self, network):
         """
         write technical statistics to network_tech_stats.txt
         :return:
         """
-        pass
+        import collections
+        import math
+        import networkx as nx
+        graph = nx.read_gml("../dblp-" + self.year + "/" + network + ".gml")
+        degree_sequence = sorted([d for n, d in graph.degree()], reverse=True)  # degree sequence
+        # print "Degree sequence", degree_sequence
+        avg_degree = (2 * graph.number_of_edges()) / float(graph.number_of_nodes())
+        degree_count = collections.Counter(degree_sequence)
+        h = 0
+        with open("../dblp-" + self.year + "/" + network + "-hc.txt", "w") as hc, open(
+                "../dblp-" + self.year + "/" + network + "-lc.txt", "w") as lc:
+            for tpl in degree_count.items():
+                if tpl[0] >= avg_degree:
+                    hc.write("{}\t{}\t{:.2f}\n".format(tpl[0], tpl[1], math.log10(tpl[1])))
+                    h += tpl[1]
+                elif tpl[0] > 0:
+                    lc.write("{}\t{}\t{:.2f}\n".format(tpl[0], tpl[1], math.log10(tpl[1])))
+                else:
+                    pass
+        skill_experts = get_skill_experts_dict(graph)
+        skill_freq = dict()
+        total = 0
+        for skill in skill_experts:
+            if len(skill_experts[skill]) in skill_freq:  # skill with same number of experts
+                skill_freq[len(skill_experts[skill])] += 1
+            else:
+                skill_freq[len(skill_experts[skill])] = 1
+            total += len(skill_experts[skill])
+        with open("../dblp-" + self.year + "/" + network + "-skl-expt-freq.txt", "w") as file:
+            for experts_freq in skill_freq:
+                file.write("{}\t{}\n".format(experts_freq, skill_freq[experts_freq]))
+        experts = dict()
+        total1 = 0
+        for node in graph.nodes:
+            if len(graph.nodes[node]) > 1:
+                skl_count = len(graph.nodes[node]["skills"].split(","))
+                if skl_count in experts:
+                    experts[skl_count] += 1
+                else:
+                    experts[skl_count] = 1
+                total1 += skl_count
+        with open("../dblp-" + self.year + "/" + network + "-expt-skl-freq.txt", "w") as file1:
+            for skl_count in experts:
+                file1.write("{}\t{}\n".format(skl_count, experts[skl_count]))
+        record = network
+        record += "\t" + str(graph.number_of_nodes())
+        record += "\t" + str(graph.number_of_edges())
+        record += "\t" + str(len(skill_experts))
+        record += "\t" + str(round(total / len(skill_experts), 2))  # experts per skill
+        record += "\t" + str(round(total1 / len(graph.nodes), 2))  # skills per expert
+        record += "\t" + str(round(h / graph.number_of_nodes(), 2))  # ratio of high collab nodes to total nodes
+        record += "\t" + str(nx.diameter(graph))
+        record += "\t" + str(round(nx.average_shortest_path_length(graph), 2))
+        open("../dblp-" + myear + "/stats-summary.txt", "a").write(record + "\n")
+        tasks = []
+        experts_per_skill = round(total / len(skill_experts), 2)
+        usual_skills = set()
+        unusual_skills = set()
+        for skill in skill_experts:
+            if len(skill_experts[skill]) >= experts_per_skill:
+                usual_skills.add(skill)
+            else:
+                unusual_skills.add(skill)
+        tot_skl = 20
+        usual_skills_list = list(usual_skills)
+        unusual_skills_list = list(unusual_skills)
+        import random
+        for i in range(tot_skl+1):
+            task = set()
+            for j in range(tot_skl - i):
+                while len(task) <= j <= len(usual_skills):
+                    task.add(random.choice(usual_skills_list))
+            for k in range(i):
+                while len(task) < tot_skl:
+                    task.add(random.choice(unusual_skills_list))
+            tasks.append(task)
+        import Algorithms
+        tot_time = 0
+        for task in tasks:
+            print(task)
+            start = time.time()
+            team = Algorithms.rarestfirst(graph, task)
+            tot_time += time.time() - start
+            print(str(time.time() - start))
+        print("rarestfirst : ", network, " " + str(tot_time))
+        tot_time = 0
+        for task in tasks:
+            start = time.time()
+            team = Algorithms.tfr(graph, task)
+            tot_time += time.time() - start
+            print(str(time.time() - start))
+        print("tfr : ", network, " " + str(tot_time))
+        tot_time = 0
+        for task in tasks:
+            start = time.time()
+            team = Algorithms.tfs(graph, task)
+            tot_time += time.time() - start
+            print(str(time.time() - start))
+        print("tfs : ", network, " " + str(tot_time))
 
 
 def multiprocessing_func(l_txt):
@@ -592,9 +687,9 @@ def multiprocessing_func(l_txt):
     # dblp_dt.write_authors_info(l_txt)
     # dblp_dt.write_titles_info(l_txt)
     # dblp_dt.write_skills_info(l_txt)
-    dblp_dt.build_graph(l_txt)
-    dblp_dt.generate_community_tasks(l_txt, 17)
-    dblp_dt.generate_community_tasks(l_txt, 1700)
+    # dblp_dt.build_graph(l_txt)
+    # dblp_dt.generate_community_tasks(l_txt, 17)
+    # dblp_dt.generate_community_tasks(l_txt, 1700)
 
 
 if __name__ == '__main__':
@@ -602,23 +697,34 @@ if __name__ == '__main__':
     import networkx as nx
 
     myear = "2015"
-    mnetwork = "dblp"
+    mnetwork = "db"
     dblp_data = DBLP_Data(myear)
-    # dblp_data.write_authors_info(mnetwork)
-    # dblp_data.write_titles_info(mnetwork)
-    # dblp_data.write_skills_info(mnetwork)
-    # dblp_data.build_graph(mnetwork)
-    # dblp_data.generate_community_tasks(mnetwork, 17)
-    # dblp_data.generate_community_tasks(mnetwork, 1700)
+    # dblp_dt.write_authors_info(l_txt)
+    # dblp_dt.write_titles_info(l_txt)
+    # dblp_dt.write_skills_info(l_txt)
+    # dblp_dt.build_graph(l_txt)
+    # dblp_dt.generate_community_tasks(l_txt, 17)
+    # dblp_dt.generate_community_tasks(l_txt, 1700)
+    # dblp_data.analysis()
+    # dblp_data.alpha_diversity()
+    open("../dblp-" + myear + "/stats-summary.txt", "w").close()
+    dblp_data.write_statistics(mnetwork)
+    for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
+        # dblp_data.write_authors_info(network)
+        # dblp_data.write_titles_info(network)
+        # dblp_data.write_skills_info(network)
+        # dblp_data.build_graph(network)
+        # dblp_data.generate_community_tasks(network, 17)
+        # dblp_data.generate_community_tasks(network, 1700)
+        # dblp_data.analysis()
+        # dblp_data.alpha_diversity()
+        dblp_data.write_statistics(network)
     # processes = []
-    # for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
-    #             "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
-    #     # for txt in ["pods"]:
+    # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
     #     processes.append(p)
     #     p.start()
     # for process in processes:
     #     process.join()
-    # dblp_data.analysis()
-    dblp_data.alpha_diversity()
+
     tqdm.write('Time taken = {} seconds'.format(time.time() - start_time))

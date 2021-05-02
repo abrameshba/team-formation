@@ -24,40 +24,35 @@ def rarestfirst(l_graph, l_task):
                 team.task.add(skill)
             team.leader = candidate
             team.experts.add(candidate)
-            if candidate not in team.expert_skills.keys():
+            if candidate not in team.expert_skills:
                 team.expert_skills[candidate] = list()
                 team.expert_skills[candidate].append(rare_skill)
             else:
                 team.expert_skills[candidate].append(rare_skill)
             for l_skill in l_task:
-                closest_expert = ""
-                if rare_skill != l_skill:
+                if l_skill!= rare_skill:
+                    closest_expert = ""
                     min_distance = 100
                     for expert in l_skill_expert[l_skill]:
-                        if expert in l_graph and candidate in l_graph and nx.has_path(l_graph, candidate,
-                                                                                      expert):
+                        if expert in l_graph and candidate in l_graph and nx.has_path(l_graph, candidate, expert):
                             distance = nx.dijkstra_path_length(l_graph, candidate, expert, weight="weight")
                             if min_distance > distance:
                                 min_distance = distance
                                 closest_expert = (expert + ".")[:-1]
-                            else:
-                                pass
-                        else:
-                            pass
                     if len(closest_expert) > 0:
                         team.experts.add(closest_expert)
-                        if closest_expert not in team.expert_skills:
-                            team.expert_skills[closest_expert] = list()
+                        if closest_expert in team.expert_skills:
                             team.expert_skills[closest_expert].append(l_skill)
                         else:
+                            team.expert_skills[closest_expert] = list()
                             team.expert_skills[closest_expert].append(l_skill)
             # print(team)
-            if team.is_formed():
-                dd = team.diameter(l_graph)
-                if dd is not None:
-                    if min_dd > dd:
-                        min_dd = dd
-                        best_team = team
+        if team.is_formed():
+            dd = team.diameter(l_graph)
+            if dd is not None:
+                if min_dd > dd:
+                    min_dd = dd
+                    best_team = team
     return best_team
 
 
@@ -351,7 +346,8 @@ def min_diam_sol(l_graph, l_task, hops) -> (dict, str):
     from Team import Team
     best_team = Team()
     max_dia = 100
-
+    import utilities
+    import networkx as nx
     # skill_id_name_dict = dict()
     # with open("../dblp-2015/db-skills.txt", "r") as file:
     #     for line in file:
@@ -360,6 +356,8 @@ def min_diam_sol(l_graph, l_task, hops) -> (dict, str):
     diamtr_nodes = utilities.get_diameter_nodes(l_graph)
     for user in tqdm(diamtr_nodes, total=len(diamtr_nodes)):
         team = Team()
+        for skill in l_task:
+            team.task.add(skill)
         ldnodes = list()
         for node in l_graph.nodes:
             if nx.dijkstra_path_length(l_graph, user, node) <= hops:
@@ -415,11 +413,11 @@ def min_diam_sol(l_graph, l_task, hops) -> (dict, str):
                             team.expert_skills[nbr[0]] = nbr[1].intersection(c_task)
                             c_task.difference_update(nbr[1].intersection(c_task))
                 break
-        cld = team.diameter(l_graph)
-        if 0 < cld < max_dia and team.is_formed():
-            max_dia = cld
-            team.formed = team.is_formed()
-            best_team = team
+        if team.is_formed():
+            cld = team.diameter(l_graph)
+            if 0 < cld < max_dia:
+                max_dia = cld
+                best_team = team
     return best_team
 
 
@@ -430,7 +428,10 @@ if __name__ == "__main__":
     import random
 
     dblp_dt = DBLP_Data("2015")
-    graph = nx.read_gml("../dblp-2015/vldb.gml")
-    task = dblp_dt.get_task_from_title_graph(graph,
-                                             "Novel Approaches in Query Processing for Moving Object Trajectories")
-    print(rarestfirst(graph, task))  # h = 5
+    graph = nx.read_gml("../dblp-2015/icdt.gml")
+    # task = dblp_dt.get_task_from_title_graph(graph,
+    # "Novel Approaches in Query Processing for Moving Object Trajectories")
+    task = ["209", "1313", "393", "50", "1421", "458", "812", "681", "1194", "587", "1180", "846", "1079",
+            "894", "424", "1208", "192"]
+    team = min_diam_sol(graph, task, 5)
+    print(team.shannon_task_diversity(graph))
