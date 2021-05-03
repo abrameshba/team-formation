@@ -394,10 +394,10 @@ class DBLPData:
                 break
             elif len(file_list) > 0:
                 max_no = len(file_list)
-                file_path = "../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-tasks-" \
+                file_path = "../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-" \
                             + str(max_no) + ".txt"
             else:
-                file_path = "../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-tasks-" \
+                file_path = "../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-" \
                             + str(max_no) + ".txt"
             all_tasks = list()
             open(file_path, "w").close()
@@ -581,9 +581,9 @@ class DBLPData:
                 break
             elif len(file_list) > 0:
                 max_no = len(file_list)
-                file_path = "../dblp-" + self.year + "/" + community + "-20d-tasks-" + str(max_no) + ".txt"
+                file_path = "../dblp-" + self.year + "/" + community + "-20d-" + str(max_no) + ".txt"
             else:
-                file_path = "../dblp-" + self.year + "/" + community + "-20d-tasks-" + str(max_no) + ".txt"
+                file_path = "../dblp-" + self.year + "/" + community + "-20d-" + str(max_no) + ".txt"
             open(file_path, "w").close()
             for i in range(tot_skl):
                 tasks = []

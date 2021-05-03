@@ -16,7 +16,7 @@ set ylabel "No of experts"
 set logscale xy
 set terminal postscript eps enhanced color
 set output network.year.'-expt-skl-pl.eps'
-plot    '../dblp-'.year.'/'.network.'-expt-skl-freq.txt' using 1:2 with point pointtype 2 lc rgb "#FF0000" title "number of experts"
+plot    '../dblp-'.year.'/'.network.'-expt-freq.txt' using 1:2 with point pointtype 2 lc rgb "#FF0000" title "number of experts"
 reset
 set title "experts for a skillhistogram"
 set xlabel "No of experts for a skill"
@@ -26,5 +26,5 @@ set label "rare skills" at 5,40
 set logscale xy
 set terminal postscript eps enhanced color
 set output network.year.'-skl-expt-pl.eps'
-plot    '../dblp-'.year.'/'.network.'-skl-expt-freq.txt' using 1:2 with point pointtype 2 lc rgb "#FF0000" title "number of experts"
+plot    '../dblp-'.year.'/'.network.'-skl-freq.txt' using 1:2 with point pointtype 2 lc rgb "#FF0000" title "number of experts"
 }
