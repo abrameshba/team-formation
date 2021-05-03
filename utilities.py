@@ -117,3 +117,95 @@ def get_diameter_nodes(l_graph):
         sour = key_with_max_val(eccentrct)  # source
         dest = key_with_max_val(nx.single_source_dijkstra(l_graph, sour)[0])  # destination
         return nx.dijkstra_path(l_graph, sour, dest)
+
+# class DBLPRecord:
+#
+#     def __init__(self):
+#         self.title = ""
+#         self.authors = set()
+#         self.year = ""
+#         self.journal = ""
+
+
+# def get_task_graph(l_graph, l_task):
+#     """
+#     return subgraph experts with shortest paths among
+#     :param l_task:
+#     :param l_graph:
+#     :return dict:
+#     """
+#     task_experts = set()
+#     skill_set = set(l_task)
+#     for node in l_graph.nodes():
+#         if len(l_graph.nodes[node]) > 0:
+#             if len(set(l_graph.nodes[node]["skills"].split(",")).intersection(skill_set)) > 0:
+#                 task_experts.add(node)
+#     return l_graph.subgraph(task_experts).copy()
+
+
+def get_skill_experts_dict(l_graph) -> dict:
+    """
+    return skill expert community dictionary for input l_graph
+    :param l_graph:
+    :return dict:
+    """
+    skill_experts = dict()
+    for node in l_graph.nodes():
+        if len(l_graph.nodes[node]) > 0:
+            for skill in l_graph.nodes[node]["skills"].split(","):
+                if skill in skill_experts:
+                    skill_experts[skill].append(node)
+                elif skill not in skill_experts:
+                    skill_experts[skill] = list([node])
+                else:
+                    pass
+    return skill_experts
+
+
+def get_cmnt_skills_from_pub(publication) -> list:
+    """
+    returns non trivial words of publication as skills packed in set
+    used to get skills of an expert
+    non trivial keywords that appear at least twice in his/her publications are skills
+    :param publication:
+    :return:
+    """
+    from nltk import word_tokenize
+    import re
+    from nltk.corpus import stopwords
+    all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
+    filtered_words = set()
+    from nltk.corpus import brown
+    setofwords = set(brown.words())
+    for word in all_words:
+        if word.lower() not in stopwords.words('english') and len(word) > 2:
+            filtered_words.add(word.lower())
+    lst = list(filtered_words.intersection(setofwords))
+    return sorted(lst)
+
+
+def get_dblp_skills_from_pub(publication) -> list:
+    """
+    returns non trivial words of publication as skills packed in set
+    used to get skills of an expert
+    non trivial keywords that appear at least twice in his/her publications are skills
+    :param publication:
+    :return:
+    """
+    from nltk import word_tokenize
+    import re
+    from nltk.corpus import stopwords
+    all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
+    filtered_words = list()
+    skills = set()
+    from nltk.corpus import brown
+    setofwords = set(brown.words())
+    for word in all_words:
+        if word.lower() not in stopwords.words('english') and len(word) > 2:
+            filtered_words.append(word.lower())
+    local_dict = list_to_freq(filtered_words)
+    for word, freq in local_dict.items():
+        if freq > 1 and word in setofwords:  # check non trivial words that appear at least twice
+            skills.add(word.lower())
+    lst = list(skills)
+    return sorted(lst)

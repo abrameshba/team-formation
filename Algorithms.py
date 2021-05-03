@@ -1,4 +1,4 @@
-import dblp_ds
+import dblpds
 
 
 def rarestfirst(l_graph, l_task):
@@ -11,7 +11,7 @@ def rarestfirst(l_graph, l_task):
     from Team import Team
     import networkx as nx
     from tqdm import tqdm
-    l_skill_expert = dblp_ds.get_skill_experts_dict(l_graph)
+    l_skill_expert = dblpds.get_skill_experts_dict(l_graph)
     rare_skills_support = [min([(len(l_skill_expert[l_skill]), l_skill) for l_skill in l_task], key=lambda x: x[0])]
     # print(rare_skills_support)    # print rarest skill support and skill
     rare_skills = [l_skill for count, l_skill in rare_skills_support]
@@ -67,7 +67,7 @@ def best_sum_distance(l_graph, l_task):
     from Team import Team
     import networkx as nx
     from tqdm import tqdm
-    l_skill_expert = dblp_ds.get_skill_experts_dict(l_graph)
+    l_skill_expert = dblpds.get_skill_experts_dict(l_graph)
     least_sum_distance = 10000
     best_team = Team()
     for skill_i in tqdm(l_task, total=len(l_task)):
@@ -129,7 +129,7 @@ def tfs(l_graph, l_task):  # twice of average degree
 
     best_ldr_distance = 1000
     # expert_skills = utilities.get_expert_skills_dict(l_graph)
-    skill_experts = dblp_ds.get_skill_experts_dict(l_graph)
+    skill_experts = dblpds.get_skill_experts_dict(l_graph)
     # print(hc)
     for c_node in tqdm(hc, total=len(hc)):
         task_copy = set(l_task)
@@ -218,7 +218,7 @@ def tfr(l_graph, l_task):  # twice of average degree
 
     best_ldr_distance = 1000
     # expert_skills = utilities.get_expert_skills_dict(l_graph)
-    skill_experts = dblp_ds.get_skill_experts_dict(l_graph)
+    skill_experts = dblpds.get_skill_experts_dict(l_graph)
     # print(hc)
     for c_node in tqdm(hc, total=len(hc)):
         task_copy = set(l_task)
@@ -290,8 +290,8 @@ def best_leader_distance(l_graph, l_task):
     import networkx as nx
     from Team import Team
     from tqdm import tqdm
-    import dblp_ds
-    l_skill_expert = dblp_ds.get_skill_experts_dict(l_graph)
+    import dblpds
+    l_skill_expert = dblpds.get_skill_experts_dict(l_graph)
     ldr_distance = 1000
     best_team = Team()
     for candidate in tqdm(nx.nodes(l_graph), total=nx.number_of_nodes(l_graph)):
@@ -424,7 +424,7 @@ def min_diam_sol(l_graph, l_task, hops) -> (dict, str):
 if __name__ == "__main__":
     import networkx as nx
     import utilities
-    from dblp_ds import DBLPData
+    from dblpds import DBLPData
     import random
 
     dblp_dt = DBLPData("2015")

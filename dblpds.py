@@ -3,106 +3,12 @@ import time
 from tqdm import tqdm
 
 
-# class DBLPRecord:
-#
-#     def __init__(self):
-#         self.title = ""
-#         self.authors = set()
-#         self.year = ""
-#         self.journal = ""
-
-
-# def get_task_graph(l_graph, l_task):
-#     """
-#     return subgraph experts with shortest paths among
-#     :param l_task:
-#     :param l_graph:
-#     :return dict:
-#     """
-#     task_experts = set()
-#     skill_set = set(l_task)
-#     for node in l_graph.nodes():
-#         if len(l_graph.nodes[node]) > 0:
-#             if len(set(l_graph.nodes[node]["skills"].split(",")).intersection(skill_set)) > 0:
-#                 task_experts.add(node)
-#     return l_graph.subgraph(task_experts).copy()
-
-
-def get_skill_experts_dict(l_graph) -> dict:
-    """
-    return skill expert community dictionary for input l_graph
-    :param l_graph:
-    :return dict:
-    """
-    skill_experts = dict()
-    for node in l_graph.nodes():
-        if len(l_graph.nodes[node]) > 0:
-            for skill in l_graph.nodes[node]["skills"].split(","):
-                if skill in skill_experts:
-                    skill_experts[skill].append(node)
-                elif skill not in skill_experts:
-                    skill_experts[skill] = list([node])
-                else:
-                    pass
-    return skill_experts
-
-
-def get_cmnt_skills_from_pub(publication) -> list:
-    """
-    returns non trivial words of publication as skills packed in set
-    used to get skills of an expert
-    non trivial keywords that appear at least twice in his/her publications are skills
-    :param publication:
-    :return:
-    """
-    from nltk import word_tokenize
-    import re
-    from nltk.corpus import stopwords
-    all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
-    filtered_words = set()
-    from nltk.corpus import brown
-    setofwords = set(brown.words())
-    for word in all_words:
-        if word.lower() not in stopwords.words('english') and len(word) > 2:
-            filtered_words.add(word.lower())
-    lst = list(filtered_words.intersection(setofwords))
-    return sorted(lst)
-
-
-def get_dblp_skills_from_pub(publication) -> list:
-    """
-    returns non trivial words of publication as skills packed in set
-    used to get skills of an expert
-    non trivial keywords that appear at least twice in his/her publications are skills
-    :param publication:
-    :return:
-    """
-    from nltk import word_tokenize
-    import re
-    import utilities
-    from nltk.corpus import stopwords
-    all_words = word_tokenize(re.sub(r'[^a-zA-Z]', ' ', publication))
-    filtered_words = list()
-    skills = set()
-    from nltk.corpus import brown
-    setofwords = set(brown.words())
-    for word in all_words:
-        if word.lower() not in stopwords.words('english') and len(word) > 2:
-            filtered_words.append(word.lower())
-    local_dict = utilities.list_to_freq(filtered_words)
-    for word, freq in local_dict.items():
-        if freq > 1 and word in setofwords:  # check non trivial words that appear at least twice
-            skills.add(word.lower())
-    lst = list(skills)
-    return sorted(lst)
-
-
 class DBLPData:
 
     def __init__(self, year):
         self.year = year
 
-    def write_authors_info(self, network):
+    def write_authors_info(self, community):
         """
         if network id dblp
         This function reads a file ../dblp-year/dblp.txt
@@ -115,11 +21,11 @@ class DBLPData:
         :return:
         """
         import utilities
-        if network == "dblp":
+        if community == "db":
             authors_name_set = set()
-            with open("../dblp-" + self.year + "/" + network + ".txt") as file:
-                n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + network + ".txt")
-                tqdm.write("processing ../dblp-" + self.year + "/" + network + ".txt - authors info ")
+            with open("../dblp-" + self.year + "/" + community + ".txt") as file:
+                n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + community + ".txt")
+                tqdm.write("processing ../dblp-" + self.year + "/" + community + ".txt - authors info ")
                 for line in tqdm(file, total=n_lines):
                     if "<author>" in line:
                         authors = line[line.index("<author>") + len("<author>"):line.index("</author>")].split(":")
@@ -131,12 +37,12 @@ class DBLPData:
             author_id = 1
             author_id_name_dict = dict()
             author_name_id_dict = dict()
-            open("../dblp-" + self.year + "/" + network + "-authors.txt", "w").close()
-            tqdm.write("writing ../dblp-" + self.year + "/" + network + "-authors.txt -  authors info ")
+            open("../dblp-" + self.year + "/" + community + "-authors.txt", "w").close()
+            tqdm.write("writing ../dblp-" + self.year + "/" + community + "-authors.txt -  authors info ")
             for author in tqdm(authors_name_set, total=len(authors_name_set)):
                 author_id_name_dict[author_id] = author
                 author_name_id_dict[author] = author_id
-                open("../dblp-" + self.year + "/" + network + "-authors.txt", "a").write(
+                open("../dblp-" + self.year + "/" + community + "-authors.txt", "a").write(
                     str(author_id) + "\t" + author + "\n")
                 author_id += 1
         else:
@@ -146,22 +52,22 @@ class DBLPData:
                     words = line.strip("\n").split("\t")
                     dblp_author_name_id_dict[words[1]] = words[0]
             author_name_id_dict = dict()
-            with open("../dblp-" + self.year + "/" + network + ".txt") as file:
-                n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + network + ".txt")
-                tqdm.write("processing ../dblp-" + self.year + "/" + network + ".txt - authors info ")
+            with open("../dblp-" + self.year + "/" + community + ".txt") as file:
+                n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + community + ".txt")
+                tqdm.write("processing ../dblp-" + self.year + "/" + community + ".txt - authors info ")
                 for line in tqdm(file, total=n_lines):
                     if "<author>" in line:
                         authors = line[line.index("<author>") + len("<author>"):line.index("</author>")].split(":")
                         for author in authors:
                             if author not in author_name_id_dict:
                                 author_name_id_dict[author] = dblp_author_name_id_dict[author]
-            open("../dblp-" + self.year + "/" + network + "-authors.txt", "w").close()
-            tqdm.write("writing ../dblp-" + self.year + "/" + network + "-authors.txt -  authors info ")
+            open("../dblp-" + self.year + "/" + community + "-authors.txt", "w").close()
+            tqdm.write("writing ../dblp-" + self.year + "/" + community + "-authors.txt -  authors info ")
             for author in tqdm(author_name_id_dict, total=len(author_name_id_dict)):
-                open("../dblp-" + self.year + "/" + network + "-authors.txt", "a").write(
+                open("../dblp-" + self.year + "/" + community + "-authors.txt", "a").write(
                     str(author_name_id_dict[author]) + "\t" + author + "\n")
 
-    def write_titles_info(self, network):
+    def write_titles_info(self, community):
         """
         This function reads a file ../dblp-year/dblp.txt
         extracts title of the publications, builds a dictionary, assigns unique id to each title.
@@ -169,11 +75,11 @@ class DBLPData:
         :return:
         """
         import utilities
-        if network == "dblp":
+        if community == "db":
             titles_set = set()
-            with open("../dblp-" + self.year + "/" + network + ".txt") as file:
-                n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + network + ".txt")
-                tqdm.write("processing ../dblp-" + self.year + "/" + network + ".txt - titles info ")
+            with open("../dblp-" + self.year + "/" + community + ".txt") as file:
+                n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + community + ".txt")
+                tqdm.write("processing ../dblp-" + self.year + "/" + community + ".txt - titles info ")
                 for line in tqdm(file, total=n_lines):
                     if "<title>" in line:
                         title = line[line.index("<title>") + len("<title>"):line.index("</title>") - 1]
@@ -183,11 +89,11 @@ class DBLPData:
                             pass
             title_id = 1
             title_id_name_dict = dict()
-            tqdm.write("writing ../dblp-" + self.year + "/" + network + "-titles.txt -  titles info ")
-            open("../dblp-" + self.year + "/" + network + "-titles.txt", "w").close()
+            tqdm.write("writing ../dblp-" + self.year + "/" + community + "-titles.txt -  titles info ")
+            open("../dblp-" + self.year + "/" + community + "-titles.txt", "w").close()
             for title in tqdm(titles_set, total=len(titles_set)):
                 title_id_name_dict[title_id] = title
-                open("../dblp-" + self.year + "/" + network + "-titles.txt", "a").write(
+                open("../dblp-" + self.year + "/" + community + "-titles.txt", "a").write(
                     str(title_id) + "\t" + title + "\n")
                 title_id += 1
         else:
@@ -197,20 +103,20 @@ class DBLPData:
                     words = line.strip("\n").split("\t")
                     dblp_title_name_id_dict[words[1]] = words[0]
             title_id_name_dict = dict()
-            with open("../dblp-" + self.year + "/" + network + ".txt") as file:
-                n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + network + ".txt")
-                tqdm.write("processing ../dblp-" + self.year + "/" + network + ".txt - titles info ")
+            with open("../dblp-" + self.year + "/" + community + ".txt") as file:
+                n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + community + ".txt")
+                tqdm.write("processing ../dblp-" + self.year + "/" + community + ".txt - titles info ")
                 for line in tqdm(file, total=n_lines):
                     if "<title>" in line:
                         title = line[line.index("<title>") + len("<title>"):line.index("</title>") - 1]
                         title_id_name_dict[dblp_title_name_id_dict[title]] = title
-            tqdm.write("writing ../dblp-" + self.year + "/" + network + "-titles.txt -  titles info ")
-            open("../dblp-" + self.year + "/" + network + "-titles.txt", "w").close()
+            tqdm.write("writing ../dblp-" + self.year + "/" + community + "-titles.txt -  titles info ")
+            open("../dblp-" + self.year + "/" + community + "-titles.txt", "w").close()
             for title_id in tqdm(title_id_name_dict, total=len(title_id_name_dict)):
-                open("../dblp-" + self.year + "/" + network + "-titles.txt", "a").write(
+                open("../dblp-" + self.year + "/" + community + "-titles.txt", "a").write(
                     str(title_id) + "\t" + title_id_name_dict[title_id] + "\n")
 
-    def write_skills_info(self, network):
+    def write_skills_info(self, community):
         """
         This function reads a file ../dblp-year/dblp.txt
         extracts pairs of authors for each publication, builds a dictionary, author as key and
@@ -227,22 +133,22 @@ class DBLPData:
         """
         import utilities
         dblp_title_id_name_dict = dict()
-        with open("../dblp-" + self.year + "/" + network + "-titles.txt", "r") as file:
+        with open("../dblp-" + self.year + "/" + community + "-titles.txt", "r") as file:
             for line in file:
                 words = line.strip("\n").split("\t")
                 dblp_title_id_name_dict[words[0]] = words[1]
         dblp_author_name_id_dict = dict()
-        with open("../dblp-" + self.year + "/" + network + "-authors.txt", "r") as file:
+        with open("../dblp-" + self.year + "/" + community + "-authors.txt", "r") as file:
             for line in file:
                 words = line.strip("\n").split("\t")
                 dblp_author_name_id_dict[words[1]] = words[0]
         author_id_skill_ids_dict = dict()
         author_id_pubs_dict = dict()
         collaborations_dict = dict()
-        with open("../dblp-" + self.year + "/" + network + ".txt") as file:
-            n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + network + ".txt")
-            open("../dblp-" + self.year + "/" + network + "-rec.txt", "w").close()
-            tqdm.write("processing ../dblp-" + self.year + "/" + network + ".txt - skills info ")
+        with open("../dblp-" + self.year + "/" + community + ".txt") as file:
+            n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + community + ".txt")
+            open("../dblp-" + self.year + "/" + community + "-rec.txt", "w").close()
+            tqdm.write("processing ../dblp-" + self.year + "/" + community + ".txt - skills info ")
             # for line in file:
             for line in tqdm(file, total=n_lines):
                 year = ""
@@ -323,23 +229,24 @@ class DBLPData:
                     record += "\t" + journal
                     record += "\t" + ":".join(authors)
                     record += "\t" + title + "\n"
-                    open("../dblp-" + self.year + "/" + network + "-rec.txt", "a").write(record)
-        tqdm.write("writing ../dblp-" + self.year + "/" + network + ".txt -  author collaborations info ")
-        open("../dblp-" + self.year + "/" + network + "-author-pair-collaborations.txt", "w").close()
+                    open("../dblp-" + self.year + "/" + community + "-rec.txt", "a").write(record)
+        tqdm.write("writing ../dblp-" + self.year + "/" + community + ".txt -  author collaborations info ")
+        open("../dblp-" + self.year + "/" + community + "-author-pair-collaborations.txt", "w").close()
         for collab in tqdm(collaborations_dict, total=len(collaborations_dict)):
-            open("../dblp-" + self.year + "/" + network + "-author-pair-collaborations.txt", "a").write(
+            open("../dblp-" + self.year + "/" + community + "-author-pair-collaborations.txt", "a").write(
                 str(collab) + "\t" + ",".join(collaborations_dict[collab]) + "\n")
-        tqdm.write("writing ../dblp-" + self.year + "/" + network + ".txt - writing author publications info ")
-        open("../dblp-" + self.year + "/" + network + "-author-publications.txt", "w").close()
+        tqdm.write("writing ../dblp-" + self.year + "/" + community + ".txt - writing author publications info ")
+        open("../dblp-" + self.year + "/" + community + "-author-publications.txt", "w").close()
         for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
-            open("../dblp-" + self.year + "/" + network + "-author-publications.txt", "a").write(
+            open("../dblp-" + self.year + "/" + community + "-author-publications.txt", "a").write(
                 str(author) + "\t" + ",".join(author_id_pubs_dict[author]) + "\n")
         import os
-        open("../dblp-" + self.year + "/" + network + "-records.txt", "w").close()
-        os.system("sort ../dblp-" + self.year + "/" + network + "-rec.txt > ../dblp-"
-                  + self.year + "/" + network + "-records.txt")
-        os.system("rm -v ../dblp-" + self.year + "/" + network + "-rec.txt >> /dev/null")
-        if network == "dblp":
+        open("../dblp-" + self.year + "/" + community + "-records.txt", "w").close()
+        os.system("sort ../dblp-" + self.year + "/" + community + "-rec.txt > ../dblp-"
+                  + self.year + "/" + community + "-records.txt")
+        os.system("rm -v ../dblp-" + self.year + "/" + community + "-rec.txt >> /dev/null")
+        import utilities
+        if community == "db":
             skill_set = set()
             author_id_skills_dict = dict()
             for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
@@ -347,27 +254,27 @@ class DBLPData:
                 author_id_skills_dict[author] = list()
                 for pub in author_id_pubs_dict[author]:
                     pub_s += " " + dblp_title_id_name_dict[pub]
-                for skill in get_dblp_skills_from_pub(pub_s):
+                for skill in utilities.get_dblp_skills_from_pub(pub_s):
                     skill_set.add(skill)
                     author_id_skills_dict[author].append(skill)
             skill_id = 1
             skill_id_name_dict = dict()
             skill_name_id_dict = dict()
-            open("../dblp-" + self.year + "/" + network + "-skills.txt", "w").close()
+            open("../dblp-" + self.year + "/" + community + "-skills.txt", "w").close()
             for skill in skill_set:
                 skill_id_name_dict[skill_id] = skill
                 skill_name_id_dict[skill] = skill_id
-                open("../dblp-" + self.year + "/" + network + "-skills.txt", "a").write(
+                open("../dblp-" + self.year + "/" + community + "-skills.txt", "a").write(
                     str(skill_id) + "\t" + skill + "\n")
                 skill_id += 1
-            tqdm.write("writing ../dblp-" + self.year + "/" + network + ".txt - writing author skills info ")
-            open("../dblp-" + self.year + "/" + network + "-author-skills.txt", "w").close()
+            tqdm.write("writing ../dblp-" + self.year + "/" + community + ".txt - writing author skills info ")
+            open("../dblp-" + self.year + "/" + community + "-author-skills.txt", "w").close()
             for author in tqdm(author_id_skills_dict, total=len(author_id_skills_dict)):
                 author_id_skill_ids_dict[author] = list()
                 for skill in author_id_skills_dict[author]:
                     author_id_skill_ids_dict[author].append(skill_name_id_dict[skill])
                 if len(author_id_skill_ids_dict[author]) > 0:
-                    open("../dblp-" + self.year + "/" + network + "-author-skills.txt", "a").write(
+                    open("../dblp-" + self.year + "/" + community + "-author-skills.txt", "a").write(
                         str(author) + "\t" + ",".join([str(intg) for intg in author_id_skill_ids_dict[author]]) + "\n")
         else:
             dblp_skill_name_id_dict = dict()
@@ -381,13 +288,13 @@ class DBLPData:
                 author_id_skill_ids_dict[author] = list()
                 for pub_id in author_id_pubs_dict[author]:
                     pub_s += " " + dblp_title_id_name_dict[pub_id]
-                    all_skills = get_cmnt_skills_from_pub(pub_s)
+                    all_skills = utilities.get_dblp_skills_from_pub(pub_s)
                     for skill in all_skills:
                         if skill in dblp_skill_name_id_dict:
                             author_id_skill_ids_dict[author].append(dblp_skill_name_id_dict[skill])
             for author_id in tqdm(author_id_skill_ids_dict, total=len(author_id_skill_ids_dict)):
                 if len(author_id_skill_ids_dict[author_id]) > 0:
-                    open("../dblp-" + self.year + "/" + network + "-author-skills.txt", "a").write(
+                    open("../dblp-" + self.year + "/" + community + "-author-skills.txt", "a").write(
                         str(author_id) + "\t" + ",".join([str(intg) for intg in
                                                           author_id_skill_ids_dict[author_id]]) + "\n")
 
@@ -432,6 +339,15 @@ class DBLPData:
             jd = round(num / den, 3)
             graph.add_edge(u, v, weight=jd)
         largest_cc = graph.subgraph(sorted(nx.connected_components(graph), key=len, reverse=True)[0])
+        adict = dict()
+        for cc in sorted(nx.connected_components(graph)):
+            if len(cc) in adict:
+                adict[len(cc)] += 1
+            else:
+                adict[len(cc)] = 1
+        with open("../dblp-" + self.year + "/" + community + ".cc", "w") as file:
+            for key in adict:
+                file.write("{}\t{}\n".format(key, adict[key]))
         # largest_cc = graph.subgraph(max([cc for cc in nx.connected_components(graph)])).copy()
         nx.draw_circular(largest_cc, with_labels=True)
         nx.write_gml(largest_cc, "../dblp-" + self.year + "/" + community + ".gml")
@@ -550,7 +466,7 @@ class DBLPData:
         """
         import utilities
         import networkx as nx
-        # dblp_data = DBLP_Data(myear)
+        # dblp_dt = DBLP_Data(myear)
         # for txt in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
         #             "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
         l_graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
@@ -564,7 +480,7 @@ class DBLPData:
         cs = self.get_community_skills_set(l_graph)
         print("skill coverage : "+str(len(hcs) / len(cs)))
 
-    def write_statistics(self, network):
+    def write_statistics(self, community):
         """
         write technical statistics to network_tech_stats.txt
         :return:
@@ -572,23 +488,24 @@ class DBLPData:
         import collections
         import math
         import networkx as nx
-        graph = nx.read_gml("../dblp-" + self.year + "/" + network + ".gml")
+        graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
         degree_sequence = sorted([d for n, d in graph.degree()], reverse=True)  # degree sequence
         # print "Degree sequence", degree_sequence
         avg_degree = (2 * graph.number_of_edges()) / float(graph.number_of_nodes())
         degree_count = collections.Counter(degree_sequence)
-        h = 0
-        with open("../dblp-" + self.year + "/" + network + "-hc.txt", "w") as hc, open(
-                "../dblp-" + self.year + "/" + network + "-lc.txt", "w") as lc:
+        hcn = 0
+        with open("../dblp-" + self.year + "/" + community + "-hc.txt", "w") as hc, open(
+                "../dblp-" + self.year + "/" + community + "-lc.txt", "w") as lc:
             for tpl in degree_count.items():
-                if tpl[0] >= avg_degree:
+                if tpl[0] >= 2 * avg_degree:
                     hc.write("{}\t{}\t{:.2f}\n".format(tpl[0], tpl[1], math.log10(tpl[1])))
-                    h += tpl[1]
+                    hcn += tpl[1]
                 elif tpl[0] > 0:
                     lc.write("{}\t{}\t{:.2f}\n".format(tpl[0], tpl[1], math.log10(tpl[1])))
                 else:
                     pass
-        skill_experts = get_skill_experts_dict(graph)
+        import utilities
+        skill_experts = utilities.get_skill_experts_dict(graph)
         skill_freq = dict()
         total_experts = 0
         for skill in skill_experts:
@@ -598,7 +515,7 @@ class DBLPData:
                 skill_freq[len(skill_experts[skill])] = 1
             total_experts += len(skill_experts[skill])  # expert counted as many times as skills
         # number of experts for a skill and number of such skills
-        with open("../dblp-" + self.year + "/" + network + "-skl-expt-freq.txt", "w") as file:
+        with open("../dblp-" + self.year + "/" + community + "-skl-freq.txt", "w") as file:
             for experts_freq in skill_freq:
                 file.write("{}\t{}\n".format(experts_freq, skill_freq[experts_freq]))
         experts = dict()
@@ -612,36 +529,38 @@ class DBLPData:
                     experts[skl_count] = 1
                 total_skills += skl_count     # skill is counted as many times as possessed by experts
         # number of skills of an expert and number experts with given number of skills
-        with open("../dblp-" + self.year + "/" + network + "-expt-skl-freq.txt", "w") as file1:
+        with open("../dblp-" + self.year + "/" + community + "-expt-freq.txt", "w") as file1:
             for skl_count in experts:
                 file1.write("{}\t{}\n".format(skl_count, experts[skl_count]))
         skills_per_expert = round(total_skills / nx.number_of_nodes(graph), 2)
         experts_per_skill = round(total_experts / len(skill_experts), 2)
-        record = network
+        record = community
         record += "\t" + str(graph.number_of_nodes())
         record += "\t" + str(graph.number_of_edges())
         record += "\t" + str(len(skill_experts))
         record += "\t" + str(experts_per_skill)  # experts per skill
         record += "\t" + str(skills_per_expert)  # skills per expert
-        record += "\t" + str(round(h / graph.number_of_nodes(), 2))  # ratio of high collab nodes to total_experts nodes
+        # ratio of high collab nodes to total_experts nodes
+        record += "\t" + str(round(hcn / graph.number_of_nodes(), 2))
         record += "\t" + str(nx.diameter(graph))
         record += "\t" + str(round(nx.average_shortest_path_length(graph), 2))
         open("../dblp-" + myear + "/stats-summary.txt", "a").write(record + "\n")
 
-    def write_distributed_tasks(self, network):
+    def write_distributed_tasks(self, community):
         import networkx as nx
+        import utilities
         max_no = 0
-        graph = nx.read_gml("../dblp-" + self.year + "/" + network + ".gml")
+        graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
         skill_freq = dict()
         total = 0
-        skill_experts = get_skill_experts_dict(graph)
+        skill_experts = utilities.get_skill_experts_dict(graph)
         for skill in skill_experts:
             if len(skill_experts[skill]) in skill_freq:  # skill with same number of experts
                 skill_freq[len(skill_experts[skill])] += 1
             else:
                 skill_freq[len(skill_experts[skill])] = 1
             total += len(skill_experts[skill])
-        skill_experts = get_skill_experts_dict(graph)
+        skill_experts = utilities.get_skill_experts_dict(graph)
         experts_per_skill = round(total / len(skill_experts), 2)
         usual_skills = set()
         unusual_skills = set()
@@ -656,15 +575,15 @@ class DBLPData:
         import random
         import glob
         for _ in range(5):
-            file_list = glob.glob("../dblp-" + self.year + "/" + network + "-20d-*.txt")
+            file_list = glob.glob("../dblp-" + self.year + "/" + community + "-20d-*.txt")
             if len(file_list) >= 5:
                 print("please delete existing(old) files")
                 break
             elif len(file_list) > 0:
                 max_no = len(file_list)
-                file_path = "../dblp-" + self.year + "/" + network + "-20d-tasks-" + str(max_no) + ".txt"
+                file_path = "../dblp-" + self.year + "/" + community + "-20d-tasks-" + str(max_no) + ".txt"
             else:
-                file_path = "../dblp-" + self.year + "/" + network + "-20d-tasks-" + str(max_no) + ".txt"
+                file_path = "../dblp-" + self.year + "/" + community + "-20d-tasks-" + str(max_no) + ".txt"
             open(file_path, "w").close()
             for i in range(tot_skl):
                 tasks = []
@@ -706,15 +625,17 @@ class DBLPData:
         # print("tfs : ", network, " " + str(tot_time))
 
 
-def multiprocessing_func(l_txt):
-    nyear = "2020"
-    dblp_dt = DBLPData(nyear)
-    # dblp_dt.write_authors_info(l_txt)
-    # dblp_dt.write_titles_info(l_txt)
-    # dblp_dt.write_skills_info(l_txt)
-    # dblp_dt.build_graph(l_txt)
-    # dblp_dt.generate_community_tasks(l_txt, 17)
-    # dblp_dt.generate_community_tasks(l_txt, 1700)
+def multiprocessing_func(community):
+    # nyear = "2020"
+    # dblp_dt = DBLPData(nyear)
+    # dblp_dt.write_authors_info(community)
+    # dblp_dt.write_titles_info(community)
+    # dblp_dt.write_skills_info(community)
+    # dblp_dt.build_graph(community)
+    # dblp_dt.generate_community_tasks(community, 17)
+    # dblp_dt.generate_community_tasks(community, 170)
+    print(community)
+    pass
 
 
 if __name__ == '__main__':
@@ -723,28 +644,28 @@ if __name__ == '__main__':
 
     myear = "2020"
     mnetwork = "db"
-    dblp_data = DBLPData(myear)
-    # dblp_dt.write_authors_info(l_txt)
-    # dblp_dt.write_titles_info(l_txt)
-    # dblp_dt.write_skills_info(l_txt)
-    # dblp_dt.build_graph(l_txt)
-    # dblp_dt.generate_community_tasks(l_txt, 17)
-    # dblp_dt.generate_community_tasks(l_txt, 1700)
-    # dblp_data.analysis(mnetwork)
-    # dblp_data.alpha_diversity(mnetwork)
-    # open("../dblp-" + myear + "/stats-summary.txt", "w").close()
-    # dblp_data.write_statistics(mnetwork)
+    dblp_dt = DBLPData(myear)
+    dblp_dt.write_authors_info(mnetwork)
+    dblp_dt.write_titles_info(mnetwork)
+    dblp_dt.write_skills_info(mnetwork)
+    dblp_dt.build_graph(mnetwork)
+    dblp_dt.generate_community_tasks(mnetwork, 17)
+    dblp_dt.generate_community_tasks(mnetwork, 170)
+    dblp_dt.analysis(mnetwork)
+    dblp_dt.alpha_diversity(mnetwork)
+    open("../dblp-" + myear + "/stats-summary.txt", "w").close()
+    dblp_dt.write_statistics(mnetwork)
     for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
-        dblp_data.write_authors_info(network)
-        dblp_data.write_titles_info(network)
-        dblp_data.write_skills_info(network)
-        dblp_data.build_graph(network)
-        dblp_data.generate_community_tasks(network, 17)
-        dblp_data.generate_community_tasks(network, 170)
-        dblp_data.analysis(network)
-        dblp_data.alpha_diversity(network)
-        dblp_data.write_statistics(network)
-        dblp_data.write_distributed_tasks(network)
+        dblp_dt.write_authors_info(network)
+        dblp_dt.write_titles_info(network)
+        dblp_dt.write_skills_info(network)
+        dblp_dt.build_graph(network)
+        dblp_dt.generate_community_tasks(network, 17)
+        dblp_dt.generate_community_tasks(network, 170)
+        dblp_dt.analysis(network)
+        dblp_dt.alpha_diversity(network)
+        dblp_dt.write_statistics(network)
+        dblp_dt.write_distributed_tasks(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
