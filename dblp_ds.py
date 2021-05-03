@@ -97,7 +97,7 @@ def get_dblp_skills_from_pub(publication) -> list:
     return sorted(lst)
 
 
-class DBLP_Data:
+class DBLPData:
 
     def __init__(self, year):
         self.year = year
@@ -391,35 +391,35 @@ class DBLP_Data:
                         str(author_id) + "\t" + ",".join([str(intg) for intg in
                                                           author_id_skill_ids_dict[author_id]]) + "\n")
 
-    def build_graph(self, network):
+    def build_graph(self, community):
         # import matplotlib.pyplot as plt
         # Read authors : nodes
         author_id_name_dict = dict()
-        with open("../dblp-" + self.year + "/" + network + "-authors.txt", "r") as file:
+        with open("../dblp-" + self.year + "/" + community + "-authors.txt", "r") as file:
             for line in file:
                 line_words = line.strip("\n").split("\t")
                 author_id_name_dict[line_words[0]] = line_words[1]
         # Read authors skills : node attributes
         author_id_skill_ids_dict = dict()
-        with open("../dblp-" + self.year + "/" + network + "-author-skills.txt", "r") as file:
+        with open("../dblp-" + self.year + "/" + community + "-author-skills.txt", "r") as file:
             for line in file:
                 line_words = line.strip("\n").split("\t")
                 author_id_skill_ids_dict[line_words[0]] = line_words[1]
         # Read author publications : to calculate jaccard distance
         author_id_pub_ids_dict = dict()
-        with open("../dblp-" + self.year + "/" + network + "-author-publications.txt", "r") as file:
+        with open("../dblp-" + self.year + "/" + community + "-author-publications.txt", "r") as file:
             for line in file:
                 line_words = line.strip("\n").split("\t")
                 author_id_pub_ids_dict[line_words[0]] = line_words[1]
         # Read collaborations
         collab_id_pub_ids_dict = dict()
-        with open("../dblp-" + self.year + "/" + network + "-author-pair-collaborations.txt", "r") as file:
+        with open("../dblp-" + self.year + "/" + community + "-author-pair-collaborations.txt", "r") as file:
             for line in file:
                 line_words = line.strip("\n").split("\t")
                 collab_id_pub_ids_dict[line_words[0]] = line_words[1]
         import networkx as nx
         graph = nx.Graph()
-        graph.name = network + " Network"
+        graph.name = community + " Network"
         for author_id in author_id_skill_ids_dict:
             if author_id in author_id_name_dict:
                 graph.add_node(author_id, name=author_id_name_dict[author_id],
@@ -434,18 +434,18 @@ class DBLP_Data:
         largest_cc = graph.subgraph(sorted(nx.connected_components(graph), key=len, reverse=True)[0])
         # largest_cc = graph.subgraph(max([cc for cc in nx.connected_components(graph)])).copy()
         nx.draw_circular(largest_cc, with_labels=True)
-        nx.write_gml(largest_cc, "../dblp-" + self.year + "/" + network + ".gml")
+        nx.write_gml(largest_cc, "../dblp-" + self.year + "/" + community + ".gml")
         # plt.show()
 
-    def alpha_diversity(self, network):
+    def alpha_diversity(self, community):
         """
         returns Shannon entropy
         :return:
         """
         import math
         # for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod", "db"]:
-        graph = nx.read_gml("../dblp-" + self.year + "/" + network + ".gml")
-        open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "w").close()
+        graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
+        open("../dblp-" + self.year + "/" + community + "-author-alpha.txt", "w").close()
         for node in graph.nodes:
             if len(graph.nodes[node]) > 0:
                 skl_count = graph.nodes[node]["skills"].split(",")
@@ -458,7 +458,7 @@ class DBLP_Data:
                 record += "\t" + str(round(shannon_alpha, 3))
                 record += "\t" + str(round(simpson_inv, 3))
                 record += "\t" + str(round(gini_simpson_div, 3)) + "\n"
-                open("../dblp-" + self.year + "/" + network + "-author-alpha.txt", "a").write(record)
+                open("../dblp-" + self.year + "/" + community + "-author-alpha.txt", "a").write(record)
 
     def generate_community_tasks(self, community, ntasks) -> None:
         """
@@ -556,13 +556,13 @@ class DBLP_Data:
         l_graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
         avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
         hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
-                     d >= avg_degree], reverse=True)
+                     d >= 2 * avg_degree], reverse=True)
         hcn = set()
         for n in hc:
             hcn.update(utilities.within_k_nbrs(l_graph, n, 2))
         hcs = self.get_community_skills_set(l_graph.subgraph(hcn).copy())
         cs = self.get_community_skills_set(l_graph)
-        print(len(hcs) / len(cs))
+        print("skill coverage : "+str(len(hcs) / len(cs)))
 
     def write_statistics(self, network):
         """
@@ -590,18 +590,19 @@ class DBLP_Data:
                     pass
         skill_experts = get_skill_experts_dict(graph)
         skill_freq = dict()
-        total = 0
+        total_experts = 0
         for skill in skill_experts:
             if len(skill_experts[skill]) in skill_freq:  # skill with same number of experts
                 skill_freq[len(skill_experts[skill])] += 1
             else:
                 skill_freq[len(skill_experts[skill])] = 1
-            total += len(skill_experts[skill])
+            total_experts += len(skill_experts[skill])  # expert counted as many times as skills
+        # number of experts for a skill and number of such skills
         with open("../dblp-" + self.year + "/" + network + "-skl-expt-freq.txt", "w") as file:
             for experts_freq in skill_freq:
                 file.write("{}\t{}\n".format(experts_freq, skill_freq[experts_freq]))
         experts = dict()
-        total1 = 0
+        total_skills = 0
         for node in graph.nodes:
             if len(graph.nodes[node]) > 1:
                 skl_count = len(graph.nodes[node]["skills"].split(","))
@@ -609,19 +610,20 @@ class DBLP_Data:
                     experts[skl_count] += 1
                 else:
                     experts[skl_count] = 1
-                total1 += skl_count
+                total_skills += skl_count     # skill is counted as many times as possessed by experts
+        # number of skills of an expert and number experts with given number of skills
         with open("../dblp-" + self.year + "/" + network + "-expt-skl-freq.txt", "w") as file1:
             for skl_count in experts:
                 file1.write("{}\t{}\n".format(skl_count, experts[skl_count]))
-        skills_per_expert = round(total1 / nx.number_of_nodes(graph), 2)
-        experts_per_skill = round(total / len(skill_experts), 2)
+        skills_per_expert = round(total_skills / nx.number_of_nodes(graph), 2)
+        experts_per_skill = round(total_experts / len(skill_experts), 2)
         record = network
         record += "\t" + str(graph.number_of_nodes())
         record += "\t" + str(graph.number_of_edges())
         record += "\t" + str(len(skill_experts))
         record += "\t" + str(experts_per_skill)  # experts per skill
         record += "\t" + str(skills_per_expert)  # skills per expert
-        record += "\t" + str(round(h / graph.number_of_nodes(), 2))  # ratio of high collab nodes to total nodes
+        record += "\t" + str(round(h / graph.number_of_nodes(), 2))  # ratio of high collab nodes to total_experts nodes
         record += "\t" + str(nx.diameter(graph))
         record += "\t" + str(round(nx.average_shortest_path_length(graph), 2))
         open("../dblp-" + myear + "/stats-summary.txt", "a").write(record + "\n")
@@ -706,7 +708,7 @@ class DBLP_Data:
 
 def multiprocessing_func(l_txt):
     nyear = "2020"
-    dblp_dt = DBLP_Data(nyear)
+    dblp_dt = DBLPData(nyear)
     # dblp_dt.write_authors_info(l_txt)
     # dblp_dt.write_titles_info(l_txt)
     # dblp_dt.write_skills_info(l_txt)
@@ -721,7 +723,7 @@ if __name__ == '__main__':
 
     myear = "2020"
     mnetwork = "db"
-    dblp_data = DBLP_Data(myear)
+    dblp_data = DBLPData(myear)
     # dblp_dt.write_authors_info(l_txt)
     # dblp_dt.write_titles_info(l_txt)
     # dblp_dt.write_skills_info(l_txt)
