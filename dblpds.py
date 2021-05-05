@@ -401,9 +401,9 @@ class DBLPData:
                             + str(max_no) + ".txt"
             all_tasks = list()
             open(file_path, "w").close()
-            iters = ntasks/17
+            iters = int(ntasks/17)
             for skills_count in range(4, 21):
-                for iter_count in range(1, iters):
+                for iter_count in range(iters):
                     task = set()
                     while len(task) < skills_count:
                         task.add(random.choice(list(community_skills)))
@@ -494,8 +494,8 @@ class DBLPData:
         avg_degree = (2 * graph.number_of_edges()) / float(graph.number_of_nodes())
         degree_count = collections.Counter(degree_sequence)
         hcn = 0
-        with open("../dblp-" + self.year + "/" + community + "-hc.txt", "w") as hc, open(
-                "../dblp-" + self.year + "/" + community + "-lc.txt", "w") as lc:
+        with open("../dblp-" + self.year + "/" + community + "-hc.txt", "w") as hc, \
+                open("../dblp-" + self.year + "/" + community + "-lc.txt", "w") as lc:
             for tpl in degree_count.items():
                 if tpl[0] >= 2 * avg_degree:
                     hc.write("{}\t{}\t{:.2f}\n".format(tpl[0], tpl[1], math.log10(tpl[1])))
@@ -585,6 +585,9 @@ class DBLPData:
             else:
                 file_path = "../dblp-" + self.year + "/" + community + "-20d-" + str(max_no) + ".txt"
             open(file_path, "w").close()
+            if len(usual_skills) < tot_skl:
+                print("short of common skills : " + community)
+                exit(0)
             for i in range(tot_skl):
                 tasks = []
                 for run in range(10):
@@ -626,7 +629,7 @@ class DBLPData:
 
 
 def multiprocessing_func(community):
-    # nyear = "2020"
+    # nyear = "2015"
     # dblp_dt = DBLPData(nyear)
     # dblp_dt.write_authors_info(community)
     # dblp_dt.write_titles_info(community)
@@ -642,20 +645,21 @@ if __name__ == '__main__':
     start_time = time.time()
     import networkx as nx
 
-    myear = "2020"
+    myear = "2015"
     mnetwork = "db"
     dblp_dt = DBLPData(myear)
-    dblp_dt.write_authors_info(mnetwork)
-    dblp_dt.write_titles_info(mnetwork)
-    dblp_dt.write_skills_info(mnetwork)
-    dblp_dt.build_graph(mnetwork)
-    dblp_dt.generate_community_tasks(mnetwork, 17)
-    dblp_dt.generate_community_tasks(mnetwork, 170)
-    dblp_dt.analysis(mnetwork)
-    dblp_dt.alpha_diversity(mnetwork)
-    open("../dblp-" + myear + "/stats-summary.txt", "w").close()
-    dblp_dt.write_statistics(mnetwork)
-    for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
+    # dblp_dt.write_authors_info(mnetwork)
+    # dblp_dt.write_titles_info(mnetwork)
+    # dblp_dt.write_skills_info(mnetwork)
+    # dblp_dt.build_graph(mnetwork)
+    # dblp_dt.generate_community_tasks(mnetwork, 17)
+    # dblp_dt.generate_community_tasks(mnetwork, 170)
+    # dblp_dt.analysis(mnetwork)
+    # dblp_dt.alpha_diversity(mnetwork)
+    # open("../dblp-" + myear + "/stats-summary.txt", "w").close()
+    # dblp_dt.write_statistics(mnetwork)
+    # dblp_dt.write_distributed_tasks(mnetwork)
+    for network in ["pods", "edbt", "vldb", "icde", "sigmod"]:
         dblp_dt.write_authors_info(network)
         dblp_dt.write_titles_info(network)
         dblp_dt.write_skills_info(network)
