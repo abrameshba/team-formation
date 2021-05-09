@@ -568,22 +568,22 @@ class DBLPData:
             if len(skill_experts[skill]) >= experts_per_skill:
                 usual_skills.add(skill)
             else:
-                unusual_skills.add(skill)
-        tot_skl = 20
+                unusual_skills.add(skill)   # rare skills
+        tot_skl = 10
         usual_skills_list = list(usual_skills)
         unusual_skills_list = list(unusual_skills)
         import random
         import glob
         for _ in range(5):
-            file_list = glob.glob("../dblp-" + self.year + "/" + community + "-20d-*.txt")
+            file_list = glob.glob("../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-*.txt")
             if len(file_list) >= 5:
                 print("please delete existing(old) files")
                 break
             elif len(file_list) > 0:
                 max_no = len(file_list)
-                file_path = "../dblp-" + self.year + "/" + community + "-20d-" + str(max_no) + ".txt"
+                file_path = "../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-" + str(max_no) + ".txt"
             else:
-                file_path = "../dblp-" + self.year + "/" + community + "-20d-" + str(max_no) + ".txt"
+                file_path = "../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-" + str(max_no) + ".txt"
             open(file_path, "w").close()
             if len(usual_skills) < tot_skl:
                 print("short of common skills : " + community)
@@ -629,7 +629,7 @@ class DBLPData:
 
 
 def multiprocessing_func(community):
-    # nyear = "2015"
+    # nyear = "2020"
     # dblp_dt = DBLPData(nyear)
     # dblp_dt.write_authors_info(community)
     # dblp_dt.write_titles_info(community)
@@ -645,7 +645,7 @@ if __name__ == '__main__':
     start_time = time.time()
     import networkx as nx
 
-    myear = "2015"
+    myear = "2020"
     mnetwork = "db"
     dblp_dt = DBLPData(myear)
     # dblp_dt.write_authors_info(mnetwork)
@@ -658,17 +658,17 @@ if __name__ == '__main__':
     # dblp_dt.alpha_diversity(mnetwork)
     # open("../dblp-" + myear + "/stats-summary.txt", "w").close()
     # dblp_dt.write_statistics(mnetwork)
-    # dblp_dt.write_distributed_tasks(mnetwork)
-    for network in ["pods", "edbt", "vldb", "icde", "sigmod"]:
-        dblp_dt.write_authors_info(network)
-        dblp_dt.write_titles_info(network)
-        dblp_dt.write_skills_info(network)
-        dblp_dt.build_graph(network)
-        dblp_dt.generate_community_tasks(network, 17)
-        dblp_dt.generate_community_tasks(network, 170)
-        dblp_dt.analysis(network)
-        dblp_dt.alpha_diversity(network)
-        dblp_dt.write_statistics(network)
+    dblp_dt.write_distributed_tasks(mnetwork)
+    for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
+    #     dblp_dt.write_authors_info(network)
+    #     dblp_dt.write_titles_info(network)
+    #     dblp_dt.write_skills_info(network)
+    #     dblp_dt.build_graph(network)
+    #     dblp_dt.generate_community_tasks(network, 17)
+    #     dblp_dt.generate_community_tasks(network, 170)
+    #     dblp_dt.analysis(network)
+    #     dblp_dt.alpha_diversity(network)
+    #     dblp_dt.write_statistics(network)
         dblp_dt.write_distributed_tasks(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
