@@ -569,7 +569,7 @@ class DBLPData:
                 usual_skills.add(skill)
             else:
                 unusual_skills.add(skill)   # rare skills
-        tot_skl = 10
+        tot_skl = 20
         usual_skills_list = list(usual_skills)
         unusual_skills_list = list(unusual_skills)
         import random
@@ -629,7 +629,7 @@ class DBLPData:
 
 
 def multiprocessing_func(community):
-    # nyear = "2020"
+    # nyear = "2015"
     # dblp_dt = DBLPData(nyear)
     # dblp_dt.write_authors_info(community)
     # dblp_dt.write_titles_info(community)
@@ -645,7 +645,7 @@ if __name__ == '__main__':
     start_time = time.time()
     import networkx as nx
 
-    myear = "2020"
+    myear = "2015"
     mnetwork = "db"
     dblp_dt = DBLPData(myear)
     # dblp_dt.write_authors_info(mnetwork)
@@ -658,8 +658,8 @@ if __name__ == '__main__':
     # dblp_dt.alpha_diversity(mnetwork)
     # open("../dblp-" + myear + "/stats-summary.txt", "w").close()
     # dblp_dt.write_statistics(mnetwork)
-    dblp_dt.write_distributed_tasks(mnetwork)
-    for network in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
+    # dblp_dt.write_distributed_tasks(mnetwork)
+    for network in [ "vldb", "icde", "sigmod"]:
     #     dblp_dt.write_authors_info(network)
     #     dblp_dt.write_titles_info(network)
     #     dblp_dt.write_skills_info(network)
