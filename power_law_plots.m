@@ -2,6 +2,9 @@
 year ="2015"
 do for [network in "pods edbt vldb icde sigmod db"] {
 reset
+stats '../dblp-'.year.'/'.network.'-nodes.txt' u 1:2
+set xrange [STATS_min_x/2:STATS_max_x*2]
+set yrange [STATS_min_y/2:STATS_max_y*2]
 set xlabel "Degree"
 set ylabel "Frequency"
 set logscale xy
@@ -12,8 +15,8 @@ stats '../dblp-'.year.'/'.network.'-nodes.txt' u 1:2
 a=1000
 b=-.10
 fit f(x) '../dblp-'.year.'/'.network.'-nodes.txt' via a, b
-plot  [STATS_min_x:STATS_max_x][STATS_min_y:STATS_max_y]  '../dblp-'.year.'/'.network.'-hc.txt' using 1:2 with point pointtype 2 lc rgb "#00FF00" title "high collaborating experts",\
-        '../dblp-'.year.'/'.network.'-lc.txt' using 1:2 with point pointtype 3 lc rgb "#FF0000" title "low collaborating experts"
+plot    '../dblp-'.year.'/'.network.'-hc.txt' using 1:2 with point pointtype 4 pointsize 2 lc rgb "#00FF00" title "high collaborating experts",\
+        '../dblp-'.year.'/'.network.'-lc.txt' using 1:2 with point pointtype 3 pointsize 2 lc rgb "#FF0000" title "low collaborating experts"
 #        f(x)  title "power law" lt 2 lw 1
 reset
 #set title "Skills of an Expert histogram"
