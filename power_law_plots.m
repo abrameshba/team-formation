@@ -2,6 +2,7 @@
 year ="2015"
 do for [network in "pods edbt vldb icde sigmod db"] {
 reset
+set title "Degree of experts histogram"
 stats '../dblp-'.year.'/'.network.'-nodes.txt' u 1:2
 set xrange [STATS_min_x/2:STATS_max_x*2]
 set yrange [STATS_min_y/2:STATS_max_y*2]
@@ -19,7 +20,8 @@ plot    '../dblp-'.year.'/'.network.'-hc.txt' using 1:2 with point pointtype 4 p
         '../dblp-'.year.'/'.network.'-lc.txt' using 1:2 with point pointtype 3 pointsize 2 lc rgb "#FF0000" title "low collaborating experts"
 #        f(x)  title "power law" lt 2 lw 1
 reset
-#set title "Skills of an Expert histogram"
+set encoding utf8
+set title "Skills of an Expert histogram"
 stats '../dblp-'.year.'/'.network.'-expt-freq.txt' u 1:2
 set xrange [STATS_min_x/2:STATS_max_x*2]
 set yrange [STATS_min_y/2:STATS_max_y*2]
@@ -31,7 +33,7 @@ set output network.'-'.year.'-expt-skl-pl.eps'
 a=1000
 b=-0.10
 fit f(x) '../dblp-'.year.'/'.network.'-expt-freq.txt' via a, b
-plot   '../dblp-'.year.'/'.network.'-expt-freq.txt' using 1:2 with point pointtype 3  pointsize 2 lc rgb "#FF0000" title "number of experts"
+plot   '../dblp-'.year.'/'.network.'-expt-freq.txt' using 1:2 with point pointtype "\U+1234"  pointsize 3 lc rgb "#FF0000" title "Number of experts"
 #        f(x)  title "power law" lt 2 lw 1
 reset
 set title "Experts for a skill histogram"
@@ -50,7 +52,7 @@ set style data histograms
 set style histogram cluster
 set style fill solid 0.5 border lt -1
 fit f(x) '../dblp-'.year.'/'.network.'-skl-freq.txt' via a, b
-#plot   [STATS_min_x:STATS_max_x][STATS_min_y:STATS_max_y] '../dblp-'.year.'/'.network.'-skl-freq.txt' using 1:2 with point pointtype 2 pointsize 3 lc rgb "#FF0000" title "number of skills"
-plot   '../dblp-'.year.'/'.network.'-skl-freq.txt' using 1:2 smooth freq with boxes title "number of skills"
+#plot   [STATS_min_x:STATS_max_x][STATS_min_y:STATS_max_y] '../dblp-'.year.'/'.network.'-skl-freq.txt' using 1:2 with point pointtype 2 pointsize 3 lc rgb "#FF0000" title "Number of skills"
+plot   '../dblp-'.year.'/'.network.'-skl-freq.txt' using 1:2 smooth freq with boxes title "Number of skills"
 #        f(x)  title "power law" lt 2 lw 1
 }
