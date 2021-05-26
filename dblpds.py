@@ -636,18 +636,100 @@ class BIBSNMData:
     def write_authors_info(self, community):
         import utilities
         if community == "bbsnm":
+            authors_name_set = set()
             with open("../bbsnm-" + self.year + "/" + community + ".txt") as file:
                 n_lines = utilities.get_num_lines("../bbsnm-" + self.year + "/" + community + ".txt")
                 tqdm.write("processing ../bbsnm-" + self.year + "/" + community + ".txt - authors info ")
                 for line in tqdm(file, total=n_lines):
-                    athrs = line.split("\t")[2].split(" and ")
-                    print(athrs)
-                        # authors = line[line.index("<author>") + len("<author>"):line.index("</author>")].split(":")
-                        # for author in authors:
-                        #     if author not in authors_name_set:
-                        #         authors_name_set.add(author)
-                        #     else:
-                        #         pass
+                    wrds = line.strip("\n").split("\t")
+                    authors = wrds[2].split(" and ")
+                    for author in authors:
+                        if len(author) > 1 and author not in authors_name_set:
+                            authors_name_set.add(author.strip(" "))
+                        else:
+                            pass
+            author_id = 1
+            author_id_name_dict = dict()
+            author_name_id_dict = dict()
+            open("../bbsnm-" + self.year + "/" + community + "-authors.txt", "w").close()
+            tqdm.write("writing ../bbsnm-" + self.year + "/" + community + "-authors.txt -  authors info ")
+            for author in tqdm(authors_name_set, total=len(authors_name_set)):
+                author_id_name_dict[author_id] = author
+                author_name_id_dict[author] = author_id
+                open("../bbsnm-" + self.year + "/" + community + "-authors.txt", "a").write(
+                    str(author_id) + "\t" + author + "\n")
+                author_id += 1
+        else:
+            dblp_author_name_id_dict = dict()
+            with open("../bbsnm-" + self.year + "/bbsnm-authors.txt", "r") as file:
+                for line in file:
+                    words = line.strip("\n").split("\t")
+                    dblp_author_name_id_dict[words[1]] = words[0]
+            author_name_id_dict = dict()
+            with open("../bbsnm-" + self.year + "/" + community + ".txt") as file:
+                n_lines = utilities.get_num_lines("../bbsnm-" + self.year + "/" + community + ".txt")
+                tqdm.write("processing ../bbsnm-" + self.year + "/" + community + ".txt - authors info ")
+                for line in tqdm(file, total=n_lines):
+                    wrds = line.strip("\n").split("\t")
+                    authors = wrds[2].split(" and ")
+                    for author in authors:
+                        if author not in author_name_id_dict:
+                            author_name_id_dict[author] = dblp_author_name_id_dict[author]
+            open("../bbsnm-" + self.year + "/" + community + "-authors.txt", "w").close()
+            tqdm.write("writing ../bbsnm-" + self.year + "/" + community + "-authors.txt -  authors info ")
+            for author in tqdm(author_name_id_dict, total=len(author_name_id_dict)):
+                open("../bbsnm-" + self.year + "/" + community + "-authors.txt", "a").write(
+                    str(author_name_id_dict[author]) + "\t" + author + "\n")
+
+    def write_titles_info(self, community):
+        """
+        This function reads a file ../bbsnm-year/bbsnm.txt
+        extracts title of the publications, builds a dictionary, assigns unique id to each title.
+        writes dictionary to a  file ../bbsnm-year/bbsnm-titles.txt
+        :return:
+        """
+        import utilities
+        if community == "bbsnm":
+            titles_set = set()
+            with open("../bbsnm-" + self.year + "/" + community + ".txt") as file:
+                n_lines = utilities.get_num_lines("../bbsnm-" + self.year + "/" + community + ".txt")
+                tqdm.write("processing ../bbsnm-" + self.year + "/" + community + ".txt - titles info ")
+                for line in tqdm(file, total=n_lines):
+                    wrds = line.strip("\n").split("\t")
+                    title = wrds[3]
+                    if title not in titles_set:
+                        titles_set.add(title)
+                    else:
+                        pass
+            title_id = 1
+            title_id_name_dict = dict()
+            tqdm.write("writing ../bbsnm-" + self.year + "/" + community + "-titles.txt -  titles info ")
+            open("../bbsnm-" + self.year + "/" + community + "-titles.txt", "w").close()
+            for title in tqdm(titles_set, total=len(titles_set)):
+                title_id_name_dict[title_id] = title
+                open("../bbsnm-" + self.year + "/" + community + "-titles.txt", "a").write(
+                    str(title_id) + "\t" + title + "\n")
+                title_id += 1
+        else:
+            dblp_title_name_id_dict = dict()
+            with open("../bbsnm-" + self.year + "/bbsnm-titles.txt", "r") as file:
+                for line in file:
+                    words = line.strip("\n").split("\t")
+                    dblp_title_name_id_dict[words[1]] = words[0]
+            title_id_name_dict = dict()
+            with open("../bbsnm-" + self.year + "/" + community + ".txt") as file:
+                n_lines = utilities.get_num_lines("../bbsnm-" + self.year + "/" + community + ".txt")
+                tqdm.write("processing ../bbsnm-" + self.year + "/" + community + ".txt - titles info ")
+                for line in tqdm(file, total=n_lines):
+                    if "<title>" in line:
+                        title = line[line.index("<title>") + len("<title>"):line.index("</title>") - 1]
+                        title_id_name_dict[dblp_title_name_id_dict[title]] = title
+            tqdm.write("writing ../bbsnm-" + self.year + "/" + community + "-titles.txt -  titles info ")
+            open("../bbsnm-" + self.year + "/" + community + "-titles.txt", "w").close()
+            for title_id in tqdm(title_id_name_dict, total=len(title_id_name_dict)):
+                open("../bbsnm-" + self.year + "/" + community + "-titles.txt", "a").write(
+                    str(title_id) + "\t" + title_id_name_dict[title_id] + "\n")
+
 
 def multiprocessing_func(community):
     # nyear = "2015"
@@ -669,9 +751,9 @@ if __name__ == '__main__':
     myear = "2009"
     mnetwork = "bbsnm"
     dblp_dt = BIBSNMData(myear)
-    dblp_dt.write_authors_info(mnetwork)
+    # dblp_dt.write_authors_info(mnetwork)
     # dblp_dt.write_titles_info(mnetwork)
-    # dblp_dt.write_skills_info(mnetwork)
+    dblp_dt.write_skills_info(mnetwork)
     # dblp_dt.build_graph(mnetwork)
     # dblp_dt.generate_community_tasks(mnetwork, 17)
     # dblp_dt.generate_community_tasks(mnetwork, 170)
@@ -681,16 +763,16 @@ if __name__ == '__main__':
     # dblp_dt.write_statistics(mnetwork)
     # dblp_dt.write_distributed_tasks(mnetwork)
     # for network in ["vldb", "icde", "sigmod"]:
-        #     dblp_dt.write_authors_info(network)
-        #     dblp_dt.write_titles_info(network)
-        #     dblp_dt.write_skills_info(network)
-        #     dblp_dt.build_graph(network)
-        #     dblp_dt.generate_community_tasks(network, 17)
-        #     dblp_dt.generate_community_tasks(network, 170)
-        #     dblp_dt.analysis(network)
-        #     dblp_dt.alpha_diversity(network)
-        #     dblp_dt.write_statistics(network)
-        # dblp_dt.write_distributed_tasks(network)
+    #     dblp_dt.write_authors_info(network)
+    #     dblp_dt.write_titles_info(network)
+    #     dblp_dt.write_skills_info(network)
+    #     dblp_dt.build_graph(network)
+    #     dblp_dt.generate_community_tasks(network, 17)
+    #     dblp_dt.generate_community_tasks(network, 170)
+    #     dblp_dt.analysis(network)
+    #     dblp_dt.alpha_diversity(network)
+    #     dblp_dt.write_statistics(network)
+    # dblp_dt.write_distributed_tasks(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
