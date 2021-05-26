@@ -730,6 +730,170 @@ class BIBSNMData:
                 open("../bbsnm-" + self.year + "/" + community + "-titles.txt", "a").write(
                     str(title_id) + "\t" + title_id_name_dict[title_id] + "\n")
 
+    def write_skills_info(self, community):
+        """
+        This function reads a file ../bbsnm-year/dblp.txt
+        extracts pairs of authors for each publication, builds a dictionary, author as key and
+        list of their publications as value.
+        non-trivial words that appear at least twice in author publications are considered as skills of that author
+        non-trivial words are free from numbers, symbols and non dictionary(brown of nltk) words, stopwords of nltk
+        writes collaborations dictionary to a  file ../bbsnm-year/dblp-author-pair-collaborations.txt
+        author id pair as key and list of shared publication ids as value
+        writes author skills dictionary to a  file ../bbsnm-year/dblp-author-skills.txt
+        author id as key and list of skill ids as value
+        writes author skills dictionary to a  file ../bbsnm-year/dblp-skills.txt
+        skill id as key and skill title as value
+        :return:
+        """
+        import utilities
+        dblp_title_id_name_dict = dict()
+        with open("../bbsnm-" + self.year + "/" + community + "-titles.txt", "r") as file:
+            for line in file:
+                words = line.strip("\n").split("\t")
+                dblp_title_id_name_dict[words[0]] = words[1]
+        dblp_author_name_id_dict = dict()
+        with open("../bbsnm-" + self.year + "/" + community + "-authors.txt", "r") as file:
+            for line in file:
+                words = line.strip("\n").split("\t")
+                dblp_author_name_id_dict[words[1]] = words[0]
+        author_id_skill_ids_dict = dict()
+        author_id_pubs_dict = dict()
+        collaborations_dict = dict()
+        with open("../bbsnm-" + self.year + "/" + community + ".txt") as file:
+            n_lines = utilities.get_num_lines("../bbsnm-" + self.year + "/" + community + ".txt")
+            open("../bbsnm-" + self.year + "/" + community + "-rec.txt", "w").close()
+            tqdm.write("processing ../bbsnm-" + self.year + "/" + community + ".txt - skills info ")
+            # for line in file:
+            for line in tqdm(file, total=n_lines):
+                wrds = line.strip("\n").split("\t")
+                year = wrds[1]
+                journal = wrds[0]
+                title = wrds[3]
+                authors = wrds[2].split(" and ")
+                for authr in authors:
+                    author = authr.strip(" ")
+                    title_key = utilities.get_key(dblp_title_id_name_dict, title)
+                    if dblp_author_name_id_dict[author] in author_id_pubs_dict:
+                        if title_key in author_id_pubs_dict[dblp_author_name_id_dict[author]]:
+                            pass
+                        else:
+                            author_id_pubs_dict[dblp_author_name_id_dict[author]].append(title_key)
+                    else:
+                        author_id_pubs_dict[dblp_author_name_id_dict[author]] = list()
+                        author_id_pubs_dict[dblp_author_name_id_dict[author]].append(title_key)
+                if len(authors) > 1:
+                    for collaborator_1 in authors:
+                        for collaborator_2 in authors:
+                            if collaborator_1 != collaborator_2:
+                                if collaborator_1 in dblp_author_name_id_dict and \
+                                        collaborator_2 in dblp_author_name_id_dict:
+                                    title_key = utilities.get_key(dblp_title_id_name_dict, title)
+                                    if str(dblp_author_name_id_dict[collaborator_1]) + ":" + str(
+                                            dblp_author_name_id_dict[collaborator_2]) in collaborations_dict:
+                                        if title_key is not None and title_key not in collaborations_dict[
+                                            str(dblp_author_name_id_dict[collaborator_1]) + ":" + str(
+                                                dblp_author_name_id_dict[collaborator_2])]:
+                                            collaborations_dict[
+                                                str(dblp_author_name_id_dict[collaborator_1]) + ":" + str(
+                                                    dblp_author_name_id_dict[collaborator_2])].append(title_key)
+                                        else:
+                                            pass
+                                    elif str(dblp_author_name_id_dict[collaborator_2]) + ":" + str(
+                                            dblp_author_name_id_dict[collaborator_1]) in collaborations_dict:
+                                        if title_key is not None and title_key not in collaborations_dict[
+                                            str(dblp_author_name_id_dict[collaborator_2]) + ":" + str(
+                                                dblp_author_name_id_dict[collaborator_1])]:
+                                            collaborations_dict[
+                                                str(dblp_author_name_id_dict[collaborator_2]) + ":" + str(
+                                                    dblp_author_name_id_dict[collaborator_1])].append(title_key)
+                                        else:
+                                            pass
+                                    elif title_key is not None:
+                                        collaborations_dict[
+                                            str(dblp_author_name_id_dict[collaborator_2]) + ":" + str(
+                                                dblp_author_name_id_dict[collaborator_1])] = list()
+                                        collaborations_dict[
+                                            str(dblp_author_name_id_dict[collaborator_2]) + ":" + str(
+                                                dblp_author_name_id_dict[collaborator_1])].append(title_key)
+                                    else:
+                                        pass
+                                else:
+                                    pass
+                if len(year) > 0 and int(year) > 1999 and len(authors) > 0 and len(title.split()) > 3 \
+                        and len(journal) > 0:
+                    record = year
+                    record += "\t" + journal
+                    record += "\t" + ":".join(authors)
+                    record += "\t" + title + "\n"
+                    open("../bbsnm-" + self.year + "/" + community + "-rec.txt", "a").write(record)
+        tqdm.write("writing ../bbsnm-" + self.year + "/" + community + ".txt -  author collaborations info ")
+        open("../bbsnm-" + self.year + "/" + community + "-author-pair-collaborations.txt", "w").close()
+        for collab in tqdm(collaborations_dict, total=len(collaborations_dict)):
+            open("../bbsnm-" + self.year + "/" + community + "-author-pair-collaborations.txt", "a").write(
+                str(collab) + "\t" + ",".join(collaborations_dict[collab]) + "\n")
+        tqdm.write("writing ../bbsnm-" + self.year + "/" + community + ".txt - writing author publications info ")
+        open("../bbsnm-" + self.year + "/" + community + "-author-publications.txt", "w").close()
+        for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
+            open("../bbsnm-" + self.year + "/" + community + "-author-publications.txt", "a").write(
+                str(author) + "\t" + ",".join(author_id_pubs_dict[author]) + "\n")
+        import os
+        open("../bbsnm-" + self.year + "/" + community + "-records.txt", "w").close()
+        os.system("sort ../bbsnm-" + self.year + "/" + community + "-rec.txt > ../bbsnm-"
+                  + self.year + "/" + community + "-records.txt")
+        os.system("rm -v ../bbsnm-" + self.year + "/" + community + "-rec.txt >> /dev/null")
+        import utilities
+        if community == "bbsnm":
+            skill_set = set()
+            author_id_skills_dict = dict()
+            for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
+                pub_s = ""
+                author_id_skills_dict[author] = list()
+                for pub in author_id_pubs_dict[author]:
+                    pub_s += " " + dblp_title_id_name_dict[pub]
+                for skill in utilities.get_dblp_skills_from_pub(pub_s):
+                    skill_set.add(skill)
+                    author_id_skills_dict[author].append(skill)
+            skill_id = 1
+            skill_id_name_dict = dict()
+            skill_name_id_dict = dict()
+            open("../bbsnm-" + self.year + "/" + community + "-skills.txt", "w").close()
+            for skill in skill_set:
+                skill_id_name_dict[skill_id] = skill
+                skill_name_id_dict[skill] = skill_id
+                open("../bbsnm-" + self.year + "/" + community + "-skills.txt", "a").write(
+                    str(skill_id) + "\t" + skill + "\n")
+                skill_id += 1
+            tqdm.write("writing ../bbsnm-" + self.year + "/" + community + ".txt - writing author skills info ")
+            open("../bbsnm-" + self.year + "/" + community + "-author-skills.txt", "w").close()
+            for author in tqdm(author_id_skills_dict, total=len(author_id_skills_dict)):
+                author_id_skill_ids_dict[author] = list()
+                for skill in author_id_skills_dict[author]:
+                    author_id_skill_ids_dict[author].append(skill_name_id_dict[skill])
+                if len(author_id_skill_ids_dict[author]) > 0:
+                    open("../bbsnm-" + self.year + "/" + community + "-author-skills.txt", "a").write(
+                        str(author) + "\t" + ",".join([str(intg) for intg in author_id_skill_ids_dict[author]]) + "\n")
+        else:
+            dblp_skill_name_id_dict = dict()
+            with open("../bbsnm-" + self.year + "/db-skills.txt", "r") as file:
+                for line in file:
+                    line_words = line.strip("\n").split()
+                    dblp_skill_name_id_dict[line_words[1]] = line_words[0]
+            author_id_skill_ids_dict = dict()
+            for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
+                pub_s = ""
+                author_id_skill_ids_dict[author] = list()
+                for pub_id in author_id_pubs_dict[author]:
+                    pub_s += " " + dblp_title_id_name_dict[pub_id]
+                    all_skills = utilities.get_dblp_skills_from_pub(pub_s)
+                    for skill in all_skills:
+                        if skill in dblp_skill_name_id_dict:
+                            author_id_skill_ids_dict[author].append(dblp_skill_name_id_dict[skill])
+            for author_id in tqdm(author_id_skill_ids_dict, total=len(author_id_skill_ids_dict)):
+                if len(author_id_skill_ids_dict[author_id]) > 0:
+                    open("../bbsnm-" + self.year + "/" + community + "-author-skills.txt", "a").write(
+                        str(author_id) + "\t" + ",".join([str(intg) for intg in
+                                                          author_id_skill_ids_dict[author_id]]) + "\n")
+
 
 def multiprocessing_func(community):
     # nyear = "2015"
