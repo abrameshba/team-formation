@@ -633,7 +633,7 @@ class BIBSNMData:
     def __init__(self, year):
         self.year = year
 
-    def write_authors_info(self):
+    def write_authors_info(self, community):
         import utilities
         if community == "bbsnm":
             with open("../bbsnm-" + self.year + "/" + community + ".txt") as file:
@@ -668,7 +668,7 @@ if __name__ == '__main__':
 
     myear = "2009"
     mnetwork = "bbsnm"
-    dblp_dt = DBLPData(myear)
+    dblp_dt = BIBSNMData(myear)
     dblp_dt.write_authors_info(mnetwork)
     # dblp_dt.write_titles_info(mnetwork)
     # dblp_dt.write_skills_info(mnetwork)
