@@ -1,5 +1,5 @@
 #!/usr/bin/gnuplot -persist
-year ="2015"
+year ="2020"
 do for [network in "pods edbt vldb icde sigmod db"] {
 reset
 set xlabel "Degree"

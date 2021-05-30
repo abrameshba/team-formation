@@ -21,7 +21,7 @@ class DBLPData:
         :return:
         """
         import utilities
-        if community == "db":
+        if community == "dblp":
             authors_name_set = set()
             with open("../dblp-" + self.year + "/" + community + ".txt") as file:
                 n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + community + ".txt")
@@ -47,7 +47,7 @@ class DBLPData:
                 author_id += 1
         else:
             dblp_author_name_id_dict = dict()
-            with open("../dblp-" + self.year + "/db-authors.txt", "r") as file:
+            with open("../dblp-" + self.year + "/dblp-authors.txt", "r") as file:
                 for line in file:
                     words = line.strip("\n").split("\t")
                     dblp_author_name_id_dict[words[1]] = words[0]
@@ -75,7 +75,7 @@ class DBLPData:
         :return:
         """
         import utilities
-        if community == "db":
+        if community == "dblp":
             titles_set = set()
             with open("../dblp-" + self.year + "/" + community + ".txt") as file:
                 n_lines = utilities.get_num_lines("../dblp-" + self.year + "/" + community + ".txt")
@@ -98,7 +98,7 @@ class DBLPData:
                 title_id += 1
         else:
             dblp_title_name_id_dict = dict()
-            with open("../dblp-" + self.year + "/db-titles.txt", "r") as file:
+            with open("../dblp-" + self.year + "/dblp-titles.txt", "r") as file:
                 for line in file:
                     words = line.strip("\n").split("\t")
                     dblp_title_name_id_dict[words[1]] = words[0]
@@ -246,7 +246,7 @@ class DBLPData:
                   + self.year + "/" + community + "-records.txt")
         os.system("rm -v ../dblp-" + self.year + "/" + community + "-rec.txt >> /dev/null")
         import utilities
-        if community == "db":
+        if community == "dblp":
             skill_set = set()
             author_id_skills_dict = dict()
             for author in tqdm(author_id_pubs_dict, total=len(author_id_pubs_dict)):
@@ -278,7 +278,7 @@ class DBLPData:
                         str(author) + "\t" + ",".join([str(intg) for intg in author_id_skill_ids_dict[author]]) + "\n")
         else:
             dblp_skill_name_id_dict = dict()
-            with open("../dblp-" + self.year + "/db-skills.txt", "r") as file:
+            with open("../dblp-" + self.year + "/dblp-skills.txt", "r") as file:
                 for line in file:
                     line_words = line.strip("\n").split()
                     dblp_skill_name_id_dict[line_words[1]] = line_words[0]
@@ -445,7 +445,7 @@ class DBLPData:
         task_skills = set()
         graph_skills = set()
         skill_name_id_dict = dict()
-        with open("../dblp-" + self.year + "/db-skills.txt", "r") as file:
+        with open("../dblp-" + self.year + "/dblp-skills.txt", "r") as file:
             for line in file:
                 line_words = line.strip("\n").split("\t")
                 skill_name_id_dict[line_words[1]] = line_words[0]
@@ -570,62 +570,41 @@ class DBLPData:
             else:
                 unusual_skills.add(skill)   # rare skills
         tot_skl = 20
-        usual_skills_list = list(usual_skills)
-        unusual_skills_list = list(unusual_skills)
-        import random
-        import glob
-        for _ in range(5):
-            file_list = glob.glob("../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-*.txt")
-            if len(file_list) >= 5:
-                print("please delete existing(old) files")
-                break
-            elif len(file_list) > 0:
-                max_no = len(file_list)
-                file_path = "../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-" + str(max_no) + ".txt"
-            else:
-                file_path = "../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-" + str(max_no) + ".txt"
-            open(file_path, "w").close()
-            if len(usual_skills) < tot_skl:
-                print("short of common skills : " + community)
-                exit(0)
-            for i in range(tot_skl):
-                tasks = []
-                for run in range(10):
-                    task = set()
-                    for j in range(tot_skl - i):
-                        while len(task) <= j <= len(usual_skills):
-                            task.add(random.choice(usual_skills_list))
-                    for k in range(i):
-                        while len(task) < tot_skl:
-                            task.add(random.choice(unusual_skills_list))
-                    tasks.append(task)
-                for task in tasks:
-                    for skill in task:
-                        open(file_path, "a").write(skill + "\t")
-                    open(file_path, "a").write("\n")
-        # import Algorithms
-        # tot_time = 0
-        # for task in tasks:
-        #     print(task)
-        #     start = time.time()
-        #     team = Algorithms.rarestfirst(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("rarestfirst : ", network, " " + str(tot_time))
-        # tot_time = 0
-        # for task in tasks:
-        #     start = time.time()
-        #     team = Algorithms.tfr(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("tfr : ", network, " " + str(tot_time))
-        # tot_time = 0
-        # for task in tasks:
-        #     start = time.time()
-        #     team = Algorithms.tfs(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("tfs : ", network, " " + str(tot_time))
+        for tot_skl in [10,20]:
+            usual_skills_list = list(usual_skills)
+            unusual_skills_list = list(unusual_skills)
+            import random
+            import glob
+            for _ in range(3):
+                file_list = glob.glob("../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-*.txt")
+                if len(file_list) >= 3:
+                    print("please delete existing(old) files")
+                    break
+                elif len(file_list) > 0:
+                    max_no = len(file_list)
+                    file_path = "../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-" + str(max_no) + ".txt"
+                else:
+                    file_path = "../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-" + str(max_no) + ".txt"
+                open(file_path, "w").close()
+                if len(usual_skills) < tot_skl:
+                    print("short of common skills : " + community)
+                    exit(0)
+                for i in range(tot_skl):
+                    tasks = []
+                    for run in range(10):
+                        task = set()
+                        for j in range(tot_skl - i):
+                            while len(task) <= j <= len(usual_skills):
+                                task.add(random.choice(usual_skills_list))
+                        for k in range(i):
+                            while len(task) < tot_skl:
+                                task.add(random.choice(unusual_skills_list))
+                        tasks.append(task)
+                    for task in tasks:
+                        for skill in task:
+                            open(file_path, "a").write(skill + "\t")
+                        open(file_path, "a").write("\n")
+
 
 
 def multiprocessing_func(community):
@@ -646,29 +625,30 @@ if __name__ == '__main__':
     import networkx as nx
 
     myear = "2015"
-    mnetwork = "db"
+    mnetwork = "dblp"
     dblp_dt = DBLPData(myear)
-    # dblp_dt.write_authors_info(mnetwork)
-    # dblp_dt.write_titles_info(mnetwork)
-    # dblp_dt.write_skills_info(mnetwork)
-    # dblp_dt.build_graph(mnetwork)
-    # dblp_dt.generate_community_tasks(mnetwork, 17)
-    # dblp_dt.generate_community_tasks(mnetwork, 170)
-    # dblp_dt.analysis(mnetwork)
-    # dblp_dt.alpha_diversity(mnetwork)
-    # open("../dblp-" + myear + "/stats-summary.txt", "w").close()
-    # dblp_dt.write_statistics(mnetwork)
-    # dblp_dt.write_distributed_tasks(mnetwork)
-    for network in [ "vldb", "icde", "sigmod"]:
-    #     dblp_dt.write_authors_info(network)
-    #     dblp_dt.write_titles_info(network)
-    #     dblp_dt.write_skills_info(network)
-    #     dblp_dt.build_graph(network)
-    #     dblp_dt.generate_community_tasks(network, 17)
-    #     dblp_dt.generate_community_tasks(network, 170)
-    #     dblp_dt.analysis(network)
-    #     dblp_dt.alpha_diversity(network)
-    #     dblp_dt.write_statistics(network)
+    dblp_dt.write_authors_info(mnetwork)
+    dblp_dt.write_titles_info(mnetwork)
+    dblp_dt.write_skills_info(mnetwork)
+    dblp_dt.build_graph(mnetwork)
+    dblp_dt.generate_community_tasks(mnetwork, 17)
+    dblp_dt.generate_community_tasks(mnetwork, 170)
+    dblp_dt.analysis(mnetwork)
+    dblp_dt.alpha_diversity(mnetwork)
+    open("../dblp-" + myear + "/stats-summary.txt", "w").close()
+    dblp_dt.write_statistics(mnetwork)
+    dblp_dt.write_distributed_tasks(mnetwork)
+    for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
+                "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+        dblp_dt.write_authors_info(network)
+        dblp_dt.write_titles_info(network)
+        dblp_dt.write_skills_info(network)
+        dblp_dt.build_graph(network)
+        dblp_dt.generate_community_tasks(network, 17)
+        dblp_dt.generate_community_tasks(network, 170)
+        dblp_dt.analysis(network)
+        dblp_dt.alpha_diversity(network)
+        dblp_dt.write_statistics(network)
         dblp_dt.write_distributed_tasks(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:

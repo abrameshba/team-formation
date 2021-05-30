@@ -44,6 +44,7 @@ rm -v ./"dblp-"$year/it4.txt
 cat ./"dblp-"$year/articles.txt >> ./"dblp-"$year/"dblp".txt
 cat ./"dblp-"$year/inproceedings.txt >> ./"dblp-"$year/"dblp".txt
 
+cp ./"dblp-"$year/"dblp".txt ./"dblp-"$year/"dblp-main".txt
 rm -v  ./"dblp-"$year/articles.txt  ./"dblp-"$year/inproceedings.txt
 
 communities=(sigmod vldb icde icdt edbt pods)
@@ -72,4 +73,12 @@ for community in "${communities[@]}"
 do
     grep -iw $community ./"dblp-"$year/"dblp".txt > ./"dblp-"$year/$community.txt
     cat ./"dblp-"$year/$community.txt >> ./"dblp-"$year/"th".txt
+done
+
+rm -v  ./"dblp-"$year/"dblp".txt
+communities=(db dm ai th)
+for community in "${communities[@]}"
+do
+    grep -iw $community ./"dblp-"$year/"dblp".txt > ./"dblp-"$year/$community.txt
+    cat ./"dblp-"$year/$community.txt >> ./"dblp-"$year/"dblp".txt
 done
