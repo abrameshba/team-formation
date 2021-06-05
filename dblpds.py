@@ -574,9 +574,9 @@ class DBLPData:
             unusual_skills_list = list(unusual_skills)
             import random
             import glob
-            for _ in range(5):
+            for _ in range(3):
                 file_list = glob.glob("../dblp-" + self.year + "/" + community + "-" + str(tot_skl) + "-*.txt")
-                if len(file_list) >= 5:
+                if len(file_list) >= 3:
                     print("please delete existing(old) files")
                     break
                 elif len(file_list) > 0:
