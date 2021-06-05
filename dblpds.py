@@ -387,9 +387,9 @@ class DBLPData:
         max_no = 0
         graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
         community_skills = self.get_community_skills_set(graph)
-        for _ in range(5):
+        for _ in range(3):
             file_list = glob.glob("../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-*.txt")
-            if len(file_list) >= 5:
+            if len(file_list) >= 3:
                 print("please delete existing(old) files")
                 break
             elif len(file_list) > 0:
@@ -514,8 +514,8 @@ class DBLPData:
             else:
                 skill_freq[len(skill_experts[skill])] = 1
             total_experts += len(skill_experts[skill])  # expert counted as many times as skills
-        # number of experts for a skill and number of such skills
-        with open("../dblp-" + self.year + "/" + community + "-skl-freq.txt", "w") as file:
+        # number of experts per skill and number of such skills
+        with open("../dblp-" + self.year + "/" + community + "-experts-per-skill.txt", "w") as file:
             for experts_freq in skill_freq:
                 file.write("{}\t{}\n".format(experts_freq, skill_freq[experts_freq]))
         experts = dict()
@@ -529,7 +529,7 @@ class DBLPData:
                     experts[skl_count] = 1
                 total_skills += skl_count  # skill is counted as many times as possessed by experts
         # number of skills of an expert and number experts with given number of skills
-        with open("../dblp-" + self.year + "/" + community + "-expt-freq.txt", "w") as file1:
+        with open("../dblp-" + self.year + "/" + community + "-skills-per-expert.txt", "w") as file1:
             for skl_count in experts:
                 file1.write("{}\t{}\n".format(skl_count, experts[skl_count]))
         skills_per_expert = round(total_skills / nx.number_of_nodes(graph), 2)
@@ -549,7 +549,6 @@ class DBLPData:
     def write_distributed_tasks(self, community):
         import networkx as nx
         import utilities
-        max_no = 0
         graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
         skill_freq = dict()
         total = 0
@@ -569,37 +568,37 @@ class DBLPData:
                 usual_skills.add(skill)
             else:
                 unusual_skills.add(skill)  # rare skills
+        print(community, len(usual_skills), len(unusual_skills))
+        pass
         for tot_skl in [10, 15, 20]:
             usual_skills_list = list(usual_skills)
             unusual_skills_list = list(unusual_skills)
+            max_no = 0
             import random
             import glob
-            for _ in range(5):
+            for _ in range(3):
                 file_list = glob.glob("../dblp-" + self.year + "/" + community + "-" + str(tot_skl) + "-*.txt")
-                if len(file_list) >= 5:
+                if len(file_list) >= 3:
                     print("please delete existing(old) files")
                     break
-                elif len(file_list) > 0:
-                    max_no = len(file_list)
-                    file_path = "../dblp-" + self.year + "/" + community + "-" + str(tot_skl) + "-" + str(
-                        max_no) + ".txt"
                 else:
+                    max_no = len(file_list)
                     file_path = "../dblp-" + self.year + "/" + community + "-" + str(tot_skl) + "-" + str(
                         max_no) + ".txt"
                 open(file_path, "w").close()
                 if len(usual_skills) < tot_skl:
                     print("short of common skills : " + community)
-                    exit(0)
+                    return
                 for i in range(tot_skl):
                     tasks = []
                     for run in range(10):
                         task = set()
-                        for j in range(tot_skl - i):
-                            while len(task) <= j <= len(usual_skills):
-                                task.add(random.choice(usual_skills_list))
                         for k in range(i):
                             while len(task) < tot_skl:
                                 task.add(random.choice(unusual_skills_list))
+                        for j in range(tot_skl):
+                            while len(task) <= j <= len(usual_skills):
+                                task.add(random.choice(usual_skills_list))
                         tasks.append(task)
                     for task in tasks:
                         for skill in task:
@@ -967,9 +966,9 @@ class BIBSNMData:
         max_no = 0
         graph = nx.read_gml("../bbsnm-" + self.year + "/" + community + ".gml")
         community_skills = self.get_community_skills_set(graph)
-        for _ in range(5):
+        for _ in range(3):
             file_list = glob.glob("../bbsnm-" + self.year + "/" + community + "-" + str(ntasks) + "-*.txt")
-            if len(file_list) >= 5:
+            if len(file_list) >= 3:
                 print("please delete existing(old) files")
                 break
             elif len(file_list) > 0:
@@ -1095,7 +1094,7 @@ class BIBSNMData:
                 skill_freq[len(skill_experts[skill])] = 1
             total_experts += len(skill_experts[skill])  # expert counted as many times as skills
         # number of experts for a skill and number of such skills
-        with open("../bbsnm-" + self.year + "/" + community + "-skl-freq.txt", "w") as file:
+        with open("../bbsnm-" + self.year + "/" + community + "-experts-per-skill.txt", "w") as file:
             for experts_freq in skill_freq:
                 file.write("{}\t{}\n".format(experts_freq, skill_freq[experts_freq]))
         experts = dict()
@@ -1109,7 +1108,7 @@ class BIBSNMData:
                     experts[skl_count] = 1
                 total_skills += skl_count  # skill is counted as many times as possessed by experts
         # number of skills of an expert and number experts with given number of skills
-        with open("../bbsnm-" + self.year + "/" + community + "-expt-freq.txt", "w") as file1:
+        with open("../bbsnm-" + self.year + "/" + community + "-skills-per-expert.txt", "w") as file1:
             for skl_count in experts:
                 file1.write("{}\t{}\n".format(skl_count, experts[skl_count]))
         skills_per_expert = round(total_skills / nx.number_of_nodes(graph), 2)
@@ -1149,14 +1148,14 @@ class BIBSNMData:
                 usual_skills.add(skill)
             else:
                 unusual_skills.add(skill)  # rare skills
-        for tot_skl in [10, 20]:
+        for tot_skl in [10, 15, 20]:
             usual_skills_list = list(usual_skills)
             unusual_skills_list = list(unusual_skills)
             import random
             import glob
-            for _ in range(5):
+            for _ in range(3):
                 file_list = glob.glob("../bbsnm-" + self.year + "/" + community + "-" + str(tot_skl) + "-*.txt")
-                if len(file_list) >= 5:
+                if len(file_list) >= 3:
                     print("please delete existing(old) files")
                     break
                 elif len(file_list) > 0:
@@ -1169,7 +1168,7 @@ class BIBSNMData:
                 open(file_path, "w").close()
                 if len(usual_skills) < tot_skl:
                     print("short of common skills : " + community)
-                    exit(0)
+                    return
                 for i in range(tot_skl):
                     tasks = []
                     for run in range(10):
@@ -1240,9 +1239,10 @@ if __name__ == '__main__':
     # dblp_dt.alpha_diversity(mnetwork)
     # open("../bbsnm-" + myear + "/stats-summary.txt", "w").close()
     # dblp_dt.write_statistics(mnetwork)
-    dblp_dt.write_distributed_tasks(mnetwork)
-    for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
-                    "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+    # dblp_dt.write_distributed_tasks(mnetwork)
+    dblp_dt.write_distributed_tasks("www")
+    # for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
+    #                 "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
         # dblp_dt.write_authors_info(network)
         # dblp_dt.write_titles_info(network)
         # dblp_dt.write_skills_info(network)
@@ -1252,7 +1252,7 @@ if __name__ == '__main__':
         # dblp_dt.analysis(network)
         # dblp_dt.alpha_diversity(network)
         # dblp_dt.write_statistics(network)
-        dblp_dt.write_distributed_tasks(network)
+        # dblp_dt.write_distributed_tasks(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
