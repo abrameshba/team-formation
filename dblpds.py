@@ -401,7 +401,7 @@ class DBLPData:
                             + str(max_no) + ".txt"
             all_tasks = list()
             open(file_path, "w").close()
-            iters = int(ntasks/17)
+            iters = int(ntasks / 17)
             for skills_count in range(4, 21):
                 for iter_count in range(iters):
                     task = set()
@@ -478,7 +478,7 @@ class DBLPData:
             hcn.update(utilities.within_k_nbrs(l_graph, n, 2))
         hcs = self.get_community_skills_set(l_graph.subgraph(hcn).copy())
         cs = self.get_community_skills_set(l_graph)
-        print("skill coverage : "+str(len(hcs) / len(cs)))
+        print("skill coverage : " + str(len(hcs) / len(cs)))
 
     def write_statistics(self, community):
         """
@@ -527,7 +527,7 @@ class DBLPData:
                     experts[skl_count] += 1
                 else:
                     experts[skl_count] = 1
-                total_skills += skl_count     # skill is counted as many times as possessed by experts
+                total_skills += skl_count  # skill is counted as many times as possessed by experts
         # number of skills of an expert and number experts with given number of skills
         with open("../dblp-" + self.year + "/" + community + "-expt-freq.txt", "w") as file1:
             for skl_count in experts:
@@ -542,8 +542,8 @@ class DBLPData:
         record += "\t" + str(skills_per_expert)  # skills per expert
         # ratio of high collab nodes to total_experts nodes
         record += "\t" + str(round(hcn / graph.number_of_nodes(), 2))
-        record += "\t" + str(nx.diameter(graph))
-        record += "\t" + str(round(nx.average_shortest_path_length(graph), 2))
+        # record += "\t" + str(nx.diameter(graph))
+        # record += "\t" + str(round(nx.average_shortest_path_length(graph), 2))
         open("../dblp-" + myear + "/stats-summary.txt", "a").write(record + "\n")
 
     def write_distributed_tasks(self, community):
@@ -568,27 +568,30 @@ class DBLPData:
             if len(skill_experts[skill]) >= experts_per_skill:
                 usual_skills.add(skill)
             else:
-                unusual_skills.add(skill)   # rare skills
-        tot_skl = 20
-        for tot_skl in [10,20]:
+                unusual_skills.add(skill)  # rare skills
+        print(community + " : " + str(len(usual_skills)) + " : " + str(len(unusual_skills)) + " : " + str(
+            len(skill_experts)))
+        for tot_skl in [10, 15, 20]:
             usual_skills_list = list(usual_skills)
             unusual_skills_list = list(unusual_skills)
             import random
             import glob
             for _ in range(3):
-                file_list = glob.glob("../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-*.txt")
+                file_list = glob.glob("../dblp-" + self.year + "/" + community + "-" + str(tot_skl) + "-*.txt")
                 if len(file_list) >= 3:
                     print("please delete existing(old) files")
                     break
                 elif len(file_list) > 0:
                     max_no = len(file_list)
-                    file_path = "../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-" + str(max_no) + ".txt"
+                    file_path = "../dblp-" + self.year + "/" + community + "-" + str(tot_skl) + "-" + str(
+                        max_no) + ".txt"
                 else:
-                    file_path = "../dblp-" + self.year + "/" + community + "-"+str(tot_skl)+"-" + str(max_no) + ".txt"
+                    file_path = "../dblp-" + self.year + "/" + community + "-" + str(tot_skl) + "-" + str(
+                        max_no) + ".txt"
                 open(file_path, "w").close()
                 if len(usual_skills) < tot_skl:
                     print("short of common skills : " + community)
-                    exit(0)
+                    return
                 for i in range(tot_skl):
                     tasks = []
                     for run in range(10):
@@ -604,7 +607,6 @@ class DBLPData:
                         for skill in task:
                             open(file_path, "a").write(skill + "\t")
                         open(file_path, "a").write("\n")
-
 
 
 def multiprocessing_func(community):
@@ -627,28 +629,28 @@ if __name__ == '__main__':
     myear = "2015"
     mnetwork = "dblp"
     dblp_dt = DBLPData(myear)
-    dblp_dt.write_authors_info(mnetwork)
-    dblp_dt.write_titles_info(mnetwork)
-    dblp_dt.write_skills_info(mnetwork)
-    dblp_dt.build_graph(mnetwork)
-    dblp_dt.generate_community_tasks(mnetwork, 17)
-    dblp_dt.generate_community_tasks(mnetwork, 170)
-    dblp_dt.analysis(mnetwork)
-    dblp_dt.alpha_diversity(mnetwork)
-    open("../dblp-" + myear + "/stats-summary.txt", "w").close()
-    dblp_dt.write_statistics(mnetwork)
+    # dblp_dt.write_authors_info(mnetwork)
+    # dblp_dt.write_titles_info(mnetwork)
+    # dblp_dt.write_skills_info(mnetwork)
+    # dblp_dt.build_graph(mnetwork)
+    # dblp_dt.generate_community_tasks(mnetwork, 17)
+    # dblp_dt.generate_community_tasks(mnetwork, 170)
+    # dblp_dt.analysis(mnetwork)
+    # dblp_dt.alpha_diversity(mnetwork)
+    # open("../dblp-" + myear + "/stats-summary.txt", "w").close()
+    # dblp_dt.write_statistics(mnetwork)
     dblp_dt.write_distributed_tasks(mnetwork)
     for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
-                "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
-        dblp_dt.write_authors_info(network)
-        dblp_dt.write_titles_info(network)
-        dblp_dt.write_skills_info(network)
-        dblp_dt.build_graph(network)
-        dblp_dt.generate_community_tasks(network, 17)
-        dblp_dt.generate_community_tasks(network, 170)
-        dblp_dt.analysis(network)
-        dblp_dt.alpha_diversity(network)
-        dblp_dt.write_statistics(network)
+                    "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+        # dblp_dt.write_authors_info(network)
+        # dblp_dt.write_titles_info(network)
+        # dblp_dt.write_skills_info(network)
+        # dblp_dt.build_graph(network)
+        # dblp_dt.generate_community_tasks(network, 17)
+        # dblp_dt.generate_community_tasks(network, 170)
+        # dblp_dt.analysis(network)
+        # dblp_dt.alpha_diversity(network)
+        # dblp_dt.write_statistics(network)
         dblp_dt.write_distributed_tasks(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:

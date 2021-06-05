@@ -1,7 +1,8 @@
 #!/usr/bin/gnuplot -persist
-year ="2020"
-do for [network in "pods edbt vldb icde sigmod db"] {
+year ="2015"
+do for [network in "pods edbt vldb icde sigmod dblp"] {
 reset
+print(network)
 set xlabel "Degree"
 set ylabel "Frequency"
 set logscale xy
