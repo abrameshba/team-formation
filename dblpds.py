@@ -573,7 +573,6 @@ class DBLPData:
         for tot_skl in [10, 15, 20]:
             usual_skills_list = list(usual_skills)
             unusual_skills_list = list(unusual_skills)
-            max_no = 0
             import random
             import glob
             for _ in range(3):
