@@ -118,7 +118,7 @@ def main_run(algori):
                 results.gini_simpson_team_diversity += team.gini_simpson_diversity(graph, True)
                 open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori +
                      "-teams.txt", "a").write(",".join(sorted(team.experts)) + "\n")
-                if crun % 10 == 0:
+                if crun % runs == 0:
                     record += str(results.task_size / runs)
                     record += "\t" + str(round(results.tot_time / runs, 3))
                     record += "\t" + str(results.cardinality / runs)
