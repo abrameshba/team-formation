@@ -1,0 +1,166 @@
+# This is a sample Python script.
+
+# Press Shift+F10 to execute it or replace it with your code.
+# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+
+from tqdm import tqdm
+
+import Algorithms
+import utilities
+
+
+class Results:
+    def __init__(self):
+        self.tot_time = 0
+        self.task_size = 0
+        self.cardinality = 0
+        self.radius = 0
+        self.diameter = 0
+        self.leader_distance = 0
+        self.leader_skill_distance = 0
+        self.sum_distance = 0
+        self.shannon_task_diversity = 0
+        self.shannon_team_diversity = 0
+        # self.simpson_task_density = 0
+        # self.simpson_team_density = 0
+        self.simpson_task_diversity = 0  # task diversity
+        self.simpson_team_diversity = 0
+        self.gini_simpson_task_diversity = 0  # task diversity
+        self.gini_simpson_team_diversity = 0
+
+    def clean_it(self):
+        self.tot_time = 0
+        self.task_size = 0
+        self.cardinality = 0
+        self.radius = 0
+        self.diameter = 0
+        self.leader_distance = 0
+        self.leader_skill_distance = 0
+        self.sum_distance = 0
+        self.shannon_task_diversity = 0
+        self.shannon_team_diversity = 0
+        # self.simpson_task_density = 0
+        # self.simpson_team_density = 0
+        self.simpson_task_diversity = 0  # task diversity
+        self.simpson_team_diversity = 0
+        self.gini_simpson_task_diversity = 0  # task diversity
+        self.gini_simpson_team_diversity = 0
+
+    def __str__(self):
+        pass
+
+    def get_heading(self):
+        heading = ""
+        heading += "Task size"
+        heading += "\t" + "Processing time"
+        heading += "\t" + "Cardinality"
+        heading += "\t" + "Radius"
+        heading += "\t" + "Diameter"
+        heading += "\t" + "Leader distance"
+        heading += "\t" + "Leader skill distance"
+        heading += "\t" + "Sum distance"
+        heading += "\t" + "Shannon task"
+        heading += "\t" + "Shannon team"
+        heading += "\t" + "task density"
+        heading += "\t" + "team density"
+        heading += "\t" + "Simpson task"  # task diversity
+        heading += "\t" + "Simpson team"
+        heading += "\t" + "Gini-Simpson task"  # task diversity
+        heading += "\t" + "Gini-Simpson team"
+        return heading
+
+
+def main_run(algori):
+    import networkx as nx
+    year = "2015"
+    # for network in ["db"]:
+    results = Results()
+    networks = ["vldb", "icde", "sigmod","db"]
+    for network in tqdm(networks):
+        print(network)
+        graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
+        # skills_name_id_dict = dict()
+        # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
+        runs = 10
+        tot_tasks = 20
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "w").close()
+        heading = results.get_heading()
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "a").write(
+            heading + "\n")
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-teams.txt", "w").close()
+        with open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0.txt", "r") as file:
+            n_lines = utilities.get_num_lines("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0.txt")
+            crun = 0  # cu
+            for line in tqdm(file, total=n_lines):
+                crun += 1
+                # task = dblp_data.get_task_from_title_graph(graph, line.strip("\n").split("\t")[1])
+                task = line.strip("\n").split()
+                # print(task)
+                record = ""
+                start_time = time.time()
+                team = Algorithms.rarestfirst(graph, task)
+                end_time = time.time()
+                tg = team.get_team_graph(graph)
+                # show_graph(tg)
+                results.task_size += len(task)
+                results.tot_time += end_time - start_time
+                results.cardinality += team.cardinality()
+                results.radius += team.radius(tg)
+                results.diameter += team.diameter(tg)
+                results.leader_distance += team.leader_distance(tg)
+                results.leader_skill_distance += team.leader_skill_distance(tg, task)
+                results.sum_distance += team.sum_distance(tg, task)
+                results.shannon_task_diversity += team.shannon_task_diversity(graph)
+                results.shannon_team_diversity += team.shannon_team_diversity(graph)
+                results.simpson_task_diversity += team.simpson_diversity(graph, False)  # task diversity
+                results.simpson_team_diversity += team.simpson_diversity(graph, True)
+                results.gini_simpson_task_diversity += team.gini_simpson_diversity(graph, False)  # task diversity
+                results.gini_simpson_team_diversity += team.gini_simpson_diversity(graph, True)
+                open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori +
+                     "-teams.txt", "a").write(",".join(sorted(team.experts)) + "\n")
+                if crun % 10 == 0:
+                    record += str(results.task_size / runs)
+                    record += "\t" + str(round(results.tot_time / runs, 3))
+                    record += "\t" + str(results.cardinality / runs)
+                    record += "\t" + str(results.radius / runs)
+                    record += "\t" + str(results.diameter / runs)
+                    record += "\t" + str(results.leader_distance / runs)
+                    record += "\t" + str(results.leader_skill_distance / runs)
+                    record += "\t" + str(results.sum_distance / runs)
+                    record += "\t" + str(results.shannon_task_diversity / runs)
+                    record += "\t" + str(results.shannon_team_diversity / runs)
+                    # record += "\t" + str(team.simpson_task_density(graph))
+                    # record += "\t" + str(team.simpson_team_density(graph))
+                    record += "\t" + str(results.simpson_task_diversity / runs)  # task diversity
+                    record += "\t" + str(results.simpson_team_diversity / runs)
+                    record += "\t" + str(results.gini_simpson_task_diversity / runs)  # task diversity
+                    record += "\t" + str(results.gini_simpson_team_diversity / runs)
+                    open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt",
+                         "a").write(
+                        record + "\n")
+                    results.clean_it()
+
+
+def multiprocessing_func(algo):
+    main_run(algo)
+
+
+def print_hi(name):
+    # Use a breakpoint in the code line below to debug your script.
+    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+    import time
+
+    begin_time = time.time()
+    main_run("rfs")
+    # processes = []
+    # for alg in ["rfs"]:
+    #     p = multiprocessing.Process(target=multiprocessing_func, args=(alg,))
+    #     processes.append(p)
+    #     p.start()
+    # for process in processes:
+    #     process.join()
+    tqdm.write('Time taken = {} seconds'.format(time.time() - begin_time))
