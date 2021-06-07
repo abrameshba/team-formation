@@ -1183,29 +1183,7 @@ class BIBSNMData:
                         for skill in task:
                             open(file_path, "a").write(skill + "\t")
                         open(file_path, "a").write("\n")
-        # import Algorithms
-        # tot_time = 0
-        # for task in tasks:
-        #     print(task)
-        #     start = time.time()
-        #     team = Algorithms.rarestfirst(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("rarestfirst : ", network, " " + str(tot_time))
-        # tot_time = 0
-        # for task in tasks:
-        #     start = time.time()
-        #     team = Algorithms.tfr(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("tfr : ", network, " " + str(tot_time))
-        # tot_time = 0
-        # for task in tasks:
-        #     start = time.time()
-        #     team = Algorithms.tfs(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("tfs : ", network, " " + str(tot_time))
+
 
 
 def multiprocessing_func(community):

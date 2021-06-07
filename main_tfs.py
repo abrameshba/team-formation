@@ -7,74 +7,14 @@ from tqdm import tqdm
 
 import Algorithms
 import utilities
-
-
-class Results:
-    def __init__(self):
-        self.tot_time = 0
-        self.task_size = 0
-        self.cardinality = 0
-        self.radius = 0
-        self.diameter = 0
-        self.leader_distance = 0
-        self.leader_skill_distance = 0
-        self.sum_distance = 0
-        self.shannon_task_diversity = 0
-        self.shannon_team_diversity = 0
-        # self.simpson_task_density = 0
-        # self.simpson_team_density = 0
-        self.simpson_task_diversity = 0  # task diversity
-        self.simpson_team_diversity = 0
-        self.gini_simpson_task_diversity = 0  # task diversity
-        self.gini_simpson_team_diversity = 0
-
-    def clean_it(self):
-        self.tot_time = 0
-        self.task_size = 0
-        self.cardinality = 0
-        self.radius = 0
-        self.diameter = 0
-        self.leader_distance = 0
-        self.leader_skill_distance = 0
-        self.sum_distance = 0
-        self.shannon_task_diversity = 0
-        self.shannon_team_diversity = 0
-        # self.simpson_task_density = 0
-        # self.simpson_team_density = 0
-        self.simpson_task_diversity = 0  # task diversity
-        self.simpson_team_diversity = 0
-        self.gini_simpson_task_diversity = 0  # task diversity
-        self.gini_simpson_team_diversity = 0
-
-    def __str__(self):
-        pass
-
-    def get_heading(self):
-        heading = ""
-        heading += "Task_size"
-        heading += "\t" + "Processing_time"
-        heading += "\t" + "Cardinality"
-        heading += "\t" + "Radius"
-        heading += "\t" + "Diameter"
-        heading += "\t" + "Leader_distance"
-        heading += "\t" + "Leader_skill_distance"
-        heading += "\t" + "Sum_distance"
-        heading += "\t" + "Shannon_task"
-        heading += "\t" + "Shannon_team"
-        # heading += "\t" + "task density"
-        # heading += "\t" + "team density"
-        heading += "\t" + "Simpson_task"  # task diversity
-        heading += "\t" + "Simpson_team"
-        heading += "\t" + "Gini-Simpson_task"  # task diversity
-        heading += "\t" + "Gini-Simpson_team"
-        return heading
+import main_rfs
 
 
 def main_run(algori):
     import networkx as nx
     year = "2015"
     # for network in ["db"]:
-    results = Results()
+    results = main_rfs.Results()
     networks = ["stacs","www","soda","ai","dm","th","db","dblp"]
     for network in tqdm(networks):
         print(network)
@@ -98,7 +38,7 @@ def main_run(algori):
                 # print(task)
                 record = ""
                 start_time = time.time()
-                team = Algorithms.rarestfirst(graph, task)
+                team = Algorithms.tfs(graph, task)
                 end_time = time.time()
                 tg = team.get_team_graph(graph)
                 # show_graph(tg)
@@ -118,7 +58,7 @@ def main_run(algori):
                 # results.gini_simpson_team_diversity += team.gini_simpson_diversity(graph, True)
                 open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori +
                      "-teams.txt", "a").write(",".join(sorted(team.experts)) + "\n")
-                if crun % runs == 0:
+                if crun % 10 == 0:
                     record += str(results.task_size / runs)
                     record += "\t" + str(round(results.tot_time / runs, 3))
                     record += "\t" + str(results.cardinality / runs)
@@ -155,7 +95,7 @@ if __name__ == '__main__':
     import time
 
     begin_time = time.time()
-    main_run("rfs")
+    main_run("tfs")
     # processes = []
     # for alg in ["rfs"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(alg,))
