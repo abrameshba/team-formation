@@ -67,14 +67,14 @@ def main_run(algori):
                     record += "\t" + str(results.leader_distance / runs)
                     record += "\t" + str(results.leader_skill_distance / runs)
                     record += "\t" + str(results.sum_distance / runs)
-                    record += "\t" + str(results.shannon_task_diversity / runs)
-                    record += "\t" + str(results.shannon_team_diversity / runs)
-                    # record += "\t" + str(team.simpson_task_density(graph))
-                    # record += "\t" + str(team.simpson_team_density(graph))
-                    record += "\t" + str(results.simpson_task_diversity / runs)  # task diversity
-                    record += "\t" + str(results.simpson_team_diversity / runs)
-                    record += "\t" + str(results.gini_simpson_task_diversity / runs)  # task diversity
-                    record += "\t" + str(results.gini_simpson_team_diversity / runs)
+                    # record += "\t" + str(results.shannon_task_diversity / runs)
+                    # record += "\t" + str(results.shannon_team_diversity / runs)
+                    # # record += "\t" + str(team.simpson_task_density(graph))
+                    # # record += "\t" + str(team.simpson_team_density(graph))
+                    # record += "\t" + str(results.simpson_task_diversity / runs)  # task diversity
+                    # record += "\t" + str(results.simpson_team_diversity / runs)
+                    # record += "\t" + str(results.gini_simpson_task_diversity / runs)  # task diversity
+                    # record += "\t" + str(results.gini_simpson_team_diversity / runs)
                     open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt",
                          "a").write(
                         record + "\n")

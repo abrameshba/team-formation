@@ -15,14 +15,14 @@ def main_run(algori):
     year = "2015"
     # for network in ["db"]:
     results = main_rfs.Results()
-    networks = ["icdt"]
+    networks = ["edbt"]
     for network in tqdm(networks):
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
         # skills_name_id_dict = dict()
         # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
-        runs = 1
-        tot_tasks = 17
+        runs = 10
+        tot_tasks = 10
         open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "w").close()
         heading = results.get_heading()
         open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "a").write(
@@ -67,14 +67,14 @@ def main_run(algori):
                     record += "\t" + str(results.leader_distance / runs)
                     record += "\t" + str(results.leader_skill_distance / runs)
                     record += "\t" + str(results.sum_distance / runs)
-                    record += "\t" + str(results.shannon_task_diversity / runs)
-                    record += "\t" + str(results.shannon_team_diversity / runs)
-                    # record += "\t" + str(team.simpson_task_density(graph))
-                    # record += "\t" + str(team.simpson_team_density(graph))
-                    record += "\t" + str(results.simpson_task_diversity / runs)  # task diversity
-                    record += "\t" + str(results.simpson_team_diversity / runs)
-                    record += "\t" + str(results.gini_simpson_task_diversity / runs)  # task diversity
-                    record += "\t" + str(results.gini_simpson_team_diversity / runs)
+                    # record += "\t" + str(results.shannon_task_diversity / runs)
+                    # record += "\t" + str(results.shannon_team_diversity / runs)
+                    # # record += "\t" + str(team.simpson_task_density(graph))
+                    # # record += "\t" + str(team.simpson_team_density(graph))
+                    # record += "\t" + str(results.simpson_task_diversity / runs)  # task diversity
+                    # record += "\t" + str(results.simpson_team_diversity / runs)
+                    # record += "\t" + str(results.gini_simpson_task_diversity / runs)  # task diversity
+                    # record += "\t" + str(results.gini_simpson_team_diversity / runs)
                     open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt",
                          "a").write(
                         record + "\n")
