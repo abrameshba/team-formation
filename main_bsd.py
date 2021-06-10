@@ -38,7 +38,7 @@ def main_run(algori):
                 # print(task)
                 record = ""
                 start_time = time.time()
-                team = Algorithms.tfr(graph, task)
+                team = Algorithms.best_sum_distance(graph, task)
                 end_time = time.time()
                 tg = team.get_team_graph(graph)
                 # show_graph(tg)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     import time
 
     begin_time = time.time()
-    main_run("tfr")
+    main_run("bsd")
     # processes = []
     # for alg in ["rfs"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(alg,))

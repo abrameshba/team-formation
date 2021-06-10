@@ -15,14 +15,14 @@ def main_run(algori):
     year = "2015"
     # for network in ["db"]:
     results = main_rfs.Results()
-    networks = ["stacs","www","soda","ai","dm","th","db","dblp"]
+    networks = ["icdt"]
     for network in tqdm(networks):
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
         # skills_name_id_dict = dict()
         # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
-        runs = 10
-        tot_tasks = 15
+        runs = 1
+        tot_tasks = 17
         open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "w").close()
         heading = results.get_heading()
         open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "a").write(
@@ -58,7 +58,7 @@ def main_run(algori):
                 # results.gini_simpson_team_diversity += team.gini_simpson_diversity(graph, True)
                 open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori +
                      "-teams.txt", "a").write(",".join(sorted(team.experts)) + "\n")
-                if crun % 10 == 0:
+                if crun % runs == 0:
                     record += str(results.task_size / runs)
                     record += "\t" + str(round(results.tot_time / runs, 3))
                     record += "\t" + str(results.cardinality / runs)

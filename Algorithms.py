@@ -61,7 +61,7 @@ def best_sum_distance(l_graph, l_task):
     :param l_task:
     :return tuple(set, dictionary, string):
     """
-    # import utilities
+    import utilities
     from Team import Team
     import networkx as nx
     from tqdm import tqdm
