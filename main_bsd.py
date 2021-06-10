@@ -15,14 +15,14 @@ def main_run(algori):
     year = "2015"
     # for network in ["db"]:
     results = main_rfs.Results()
-    networks = ["icdt"]
+    networks = ["icdt", "stoc", "icml", "sigmod", "stacs", "uai", "soda", "www", "edbt", "kdd", "sdm", "icde"]
     for network in tqdm(networks):
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
         # skills_name_id_dict = dict()
         # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
-        runs = 1
-        tot_tasks = 17
+        runs = 10
+        tot_tasks = 10
         open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "w").close()
         heading = results.get_heading()
         open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "a").write(

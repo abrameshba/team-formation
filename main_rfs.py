@@ -75,7 +75,7 @@ def main_run(algori):
     year = "2015"
     # for network in ["db"]:
     results = Results()
-    networks = ["edbt"]
+    networks = ["icdt", "stoc", "icml", "sigmod", "stacs", "uai", "soda", "www", "edbt", "kdd", "sdm", "icde"]
     for network in tqdm(networks):
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
