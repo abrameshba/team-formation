@@ -71,7 +71,7 @@ set style data histograms
 set style histogram cluster
 set style fill solid 0.5 border lt -1
 fit f(x) '../dblp-'.year.'/'.network.'-experts-per-skill.txt' via a, b
-plot    '../dblp-'.year.'/'.network.'-experts-per-skill.txt' using 1:2 with point pointtype 3 pointsize 2 lc rgb "#0000FF" title "Number of skills"
+plot    '../dblp-'.year.'/'.network.'-experts-per-skill.txt' using (($1>3)? $1 : 1/0):2  with point pointtype 3 pointsize 2 lc rgb "#0000FF" title "Number of skills"
 #        f(x)  title "power law" lt 2 lw 1
 #print "".network."".a."".b.""
 #print("a=%1.2f",a)
