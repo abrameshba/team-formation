@@ -384,9 +384,17 @@ class DBLPData:
         import glob
         import random
         import networkx as nx
+        import utilities
         max_no = 0
         graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
-        community_skills = self.get_community_skills_set(graph)
+        community_skills = set()
+        skill_experts = utilities.get_skill_experts_dict(graph)
+        rare_skills = set()
+        for skill in skill_experts:
+            if len(skill_experts[skill]) <= 3:
+                rare_skills.add(skill)
+            else:
+                community_skills.add(skill)  # rare skills
         for _ in range(3):
             file_list = glob.glob("../dblp-" + self.year + "/" + community + "-" + str(ntasks) + "-*.txt")
             if len(file_list) >= 3:
@@ -563,17 +571,23 @@ class DBLPData:
         experts_per_skill = round(total / len(skill_experts), 2)
         usual_skills = set()
         unusual_skills = set()
+        rare_skills = set()
         for skill in skill_experts:
             if len(skill_experts[skill]) >= experts_per_skill:
                 usual_skills.add(skill)
             else:
-                unusual_skills.add(skill)  # rare skills
-        print(community, len(usual_skills), len(unusual_skills))
-        pass
+                if len(skill_experts[skill]) <= 4:
+                    rare_skills.add(skill)
+                else:
+                    unusual_skills.add(skill)  # rare skills
+        rec = ""
+        rec += str(len(usual_skills)) + "\t"
+        rec += str(len(unusual_skills)) + "\t"
+        rec += str(len(rare_skills)) + "\t"
+        print(community + "\t" + rec + "\n")
         for tot_skl in [10, 15, 20]:
             usual_skills_list = list(usual_skills)
             unusual_skills_list = list(unusual_skills)
-            max_no = 0
             import random
             import glob
             for _ in range(3):
@@ -963,9 +977,17 @@ class BIBSNMData:
         import glob
         import random
         import networkx as nx
+        import utilities
         max_no = 0
         graph = nx.read_gml("../bbsnm-" + self.year + "/" + community + ".gml")
-        community_skills = self.get_community_skills_set(graph)
+        community_skills = set()
+        skill_experts = utilities.get_skill_experts_dict(graph)
+        rare_skills = set()
+        for skill in skill_experts:
+            if len(skill_experts[skill]) <= 3:
+                rare_skills.add(skill)
+            else:
+                community_skills.add(skill)  # rare skills
         for _ in range(3):
             file_list = glob.glob("../bbsnm-" + self.year + "/" + community + "-" + str(ntasks) + "-*.txt")
             if len(file_list) >= 3:
@@ -1143,11 +1165,20 @@ class BIBSNMData:
         experts_per_skill = round(total / len(skill_experts), 2)
         usual_skills = set()
         unusual_skills = set()
+        rare_skills = set()
         for skill in skill_experts:
             if len(skill_experts[skill]) >= experts_per_skill:
                 usual_skills.add(skill)
             else:
-                unusual_skills.add(skill)  # rare skills
+                if len(skill_experts[skill]) <= 4:
+                    rare_skills.add(skill)
+                else:
+                    unusual_skills.add(skill)  # rare skills
+        rec = ""
+        rec += str(len(usual_skills)) + "\t"
+        rec += str(len(unusual_skills)) + "\t"
+        rec += str(len(rare_skills)) + "\t"
+        print(community + "\t" + rec + "\n")
         for tot_skl in [10, 15, 20]:
             usual_skills_list = list(usual_skills)
             unusual_skills_list = list(unusual_skills)
@@ -1184,29 +1215,6 @@ class BIBSNMData:
                         for skill in task:
                             open(file_path, "a").write(skill + "\t")
                         open(file_path, "a").write("\n")
-        # import Algorithms
-        # tot_time = 0
-        # for task in tasks:
-        #     print(task)
-        #     start = time.time()
-        #     team = Algorithms.rarestfirst(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("rarestfirst : ", network, " " + str(tot_time))
-        # tot_time = 0
-        # for task in tasks:
-        #     start = time.time()
-        #     team = Algorithms.tfr(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("tfr : ", network, " " + str(tot_time))
-        # tot_time = 0
-        # for task in tasks:
-        #     start = time.time()
-        #     team = Algorithms.tfs(graph, task)
-        #     tot_time += time.time() - start
-        #     print(str(time.time() - start))
-        # print("tfs : ", network, " " + str(tot_time))
 
 
 def multiprocessing_func(community):
@@ -1233,26 +1241,25 @@ if __name__ == '__main__':
     # dblp_dt.write_titles_info(mnetwork)
     # dblp_dt.write_skills_info(mnetwork)
     # dblp_dt.build_graph(mnetwork)
-    # dblp_dt.generate_community_tasks(mnetwork, 17)
-    # dblp_dt.generate_community_tasks(mnetwork, 170)
+    dblp_dt.generate_community_tasks(mnetwork, 17)
+    dblp_dt.generate_community_tasks(mnetwork, 170)
     # dblp_dt.analysis(mnetwork)
     # dblp_dt.alpha_diversity(mnetwork)
     # open("../bbsnm-" + myear + "/stats-summary.txt", "w").close()
     # dblp_dt.write_statistics(mnetwork)
-    # dblp_dt.write_distributed_tasks(mnetwork)
-    dblp_dt.write_distributed_tasks("www")
-    # for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
-    #                 "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+    dblp_dt.write_distributed_tasks(mnetwork)
+    for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
+                    "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
         # dblp_dt.write_authors_info(network)
         # dblp_dt.write_titles_info(network)
         # dblp_dt.write_skills_info(network)
         # dblp_dt.build_graph(network)
-        # dblp_dt.generate_community_tasks(network, 17)
-        # dblp_dt.generate_community_tasks(network, 170)
+        dblp_dt.generate_community_tasks(network, 17)
+        dblp_dt.generate_community_tasks(network, 170)
         # dblp_dt.analysis(network)
         # dblp_dt.alpha_diversity(network)
         # dblp_dt.write_statistics(network)
-        # dblp_dt.write_distributed_tasks(network)
+        dblp_dt.write_distributed_tasks(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
