@@ -7,22 +7,23 @@ from tqdm import tqdm
 
 import Algorithms
 import utilities
-import main_rfs
+import main_rarestfirst
 
 
-def main_run(algori, mhops):
+def main_run(algori):
     import networkx as nx
     year = "2015"
     # for network in ["db"]:
-    results = main_rfs.Results()
-    networks = ["icdt", "stoc", "icml", "sigmod", "stacs", "uai", "soda", "www", "edbt", "kdd", "sdm", "icde"]
+    results = main_rarestfirst.Results()
+    networks = ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml", "ecml",
+                "colt", "uai", "soda", "focs", "stoc", "stacs"]
     for network in tqdm(networks):
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
         # skills_name_id_dict = dict()
         # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
         runs = 10
-        tot_tasks = 10
+        tot_tasks = 170
         open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "w").close()
         heading = results.get_heading()
         open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "a").write(
@@ -38,7 +39,7 @@ def main_run(algori, mhops):
                 # print(task)
                 record = ""
                 start_time = time.time()
-                team = Algorithms.min_diam_sol(graph, task,mhops)
+                team = Algorithms.best_leader_distance(graph, task)
                 end_time = time.time()
                 tg = team.get_team_graph(graph)
                 # show_graph(tg)
@@ -95,7 +96,7 @@ if __name__ == '__main__':
     import time
 
     begin_time = time.time()
-    main_run("mds",5)
+    main_run("bld")
     # processes = []
     # for alg in ["rfs"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(alg,))

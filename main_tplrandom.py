@@ -7,15 +7,16 @@ from tqdm import tqdm
 
 import Algorithms
 import utilities
-import main_rfs
+import main_rarestfirst
 
 
 def main_run(algori):
     import networkx as nx
     year = "2015"
     # for network in ["db"]:
-    results = main_rfs.Results()
-    networks = ["icdt", "stoc", "icml", "sigmod", "stacs", "uai", "soda", "www", "edbt", "kdd", "sdm", "icde"]
+    results = main_rarestfirst.Results()
+    networks = ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
+                "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th", "dblp"]
     for network in tqdm(networks):
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
@@ -38,7 +39,7 @@ def main_run(algori):
                 # print(task)
                 record = ""
                 start_time = time.time()
-                team = Algorithms.best_sum_distance(graph, task)
+                team = Algorithms.tfr(graph, task)
                 end_time = time.time()
                 tg = team.get_team_graph(graph)
                 # show_graph(tg)
@@ -95,7 +96,7 @@ if __name__ == '__main__':
     import time
 
     begin_time = time.time()
-    main_run("bsd")
+    main_run("tfr")
     # processes = []
     # for alg in ["rfs"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(alg,))

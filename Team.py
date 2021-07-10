@@ -40,6 +40,7 @@ class Team:
         :return:
         """
         nodes = set()
+        nodes.add(self.leader)
         import networkx as nx
         for nd1 in self.experts:
             if nd1 != self.leader:
@@ -55,6 +56,7 @@ class Team:
         :return:
         """
         nodes = set()
+        nodes.add(self.leader)
         import networkx as nx
         for nd1 in self.experts:
             for nd2 in self.experts:

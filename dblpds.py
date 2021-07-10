@@ -453,7 +453,7 @@ class DBLPData:
         task_skills = set()
         graph_skills = set()
         skill_name_id_dict = dict()
-        with open("../dblp-" + self.year + "/db-skills.txt", "r") as file:
+        with open("../dblp-" + self.year + "/dblp-skills.txt", "r") as file:
             for line in file:
                 line_words = line.strip("\n").split("\t")
                 skill_name_id_dict[line_words[1]] = line_words[0]
@@ -479,14 +479,19 @@ class DBLPData:
         #             "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
         l_graph = nx.read_gml("../dblp-" + self.year + "/" + community + ".gml")
         avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
-        hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
-                     d >= 2 * avg_degree], reverse=True)
-        hcn = set()
-        for n in hc:
-            hcn.update(utilities.within_k_nbrs(l_graph, n, 2))
-        hcs = self.get_community_skills_set(l_graph.subgraph(hcn).copy())
+        print(community)
         cs = self.get_community_skills_set(l_graph)
-        print("skill coverage : " + str(len(hcs) / len(cs)))
+        for gama in [1, 2, 3]:
+            hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
+                         d >= gama * avg_degree], reverse=True)
+            print("folds of avg : "+str(gama)+" : " + str(round(len(hc) / l_graph.number_of_nodes(),3)))
+            for hops in [1, 2, 3]:
+                hcn = set()
+                for n in hc:
+                    hcn.update(utilities.within_k_nbrs(l_graph, n, hops))
+                hcs = self.get_community_skills_set(l_graph.subgraph(hcn).copy())
+                print("graph coverage : " + str(hops) + " : " + str(round(len(hcn) / l_graph.number_of_nodes(),3)))
+                print("skill coverage : " + str(round(len(hcs) / len(cs),3)))
 
     def write_statistics(self, community):
         """
@@ -576,7 +581,7 @@ class DBLPData:
             if len(skill_experts[skill]) >= experts_per_skill:
                 usual_skills.add(skill)
             else:
-                if len(skill_experts[skill]) <= 4:
+                if len(skill_experts[skill]) <= 3:
                     rare_skills.add(skill)
                 else:
                     unusual_skills.add(skill)  # rare skills
@@ -1241,25 +1246,25 @@ if __name__ == '__main__':
     # dblp_dt.write_titles_info(mnetwork)
     # dblp_dt.write_skills_info(mnetwork)
     # dblp_dt.build_graph(mnetwork)
-    dblp_dt.generate_community_tasks(mnetwork, 17)
-    dblp_dt.generate_community_tasks(mnetwork, 170)
+    # dblp_dt.generate_community_tasks(mnetwork, 17)
+    # dblp_dt.generate_community_tasks(mnetwork, 170)
     # dblp_dt.analysis(mnetwork)
     # dblp_dt.alpha_diversity(mnetwork)
     # open("../bbsnm-" + myear + "/stats-summary.txt", "w").close()
     # dblp_dt.write_statistics(mnetwork)
-    dblp_dt.write_distributed_tasks(mnetwork)
+    # dblp_dt.write_distributed_tasks(mnetwork)
     for network in ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
-                    "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th"]:
+                    "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th", "dblp"]:
         # dblp_dt.write_authors_info(network)
         # dblp_dt.write_titles_info(network)
         # dblp_dt.write_skills_info(network)
         # dblp_dt.build_graph(network)
-        dblp_dt.generate_community_tasks(network, 17)
-        dblp_dt.generate_community_tasks(network, 170)
-        # dblp_dt.analysis(network)
+        # dblp_dt.generate_community_tasks(network, 17)
+        # dblp_dt.generate_community_tasks(network, 170)
+        dblp_dt.analysis(network)
         # dblp_dt.alpha_diversity(network)
         # dblp_dt.write_statistics(network)
-        dblp_dt.write_distributed_tasks(network)
+        # dblp_dt.write_distributed_tasks(network)
     # processes = []
     # for mnetwork in ["icdt", "pods", "edbt", "vldb", "icde", "sigmod"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(txt,))
