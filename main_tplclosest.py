@@ -15,40 +15,66 @@ def main_run(algori):
     year = "2015"
     # for network in ["db"]:
     results = main_rarestfirst.Results()
-    networks = ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml", "ecml",
-                "colt", "uai", "soda", "focs", "stoc", "stacs"]
+    networks = ["db"]
     # networks = ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
     #             "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th", "dblp"]
+    # , "sigmod", "icde", "icdt", "edbt", "pods"
+    cs = set()
     for network in tqdm(networks):
+        # vldb = nx.read_gml("../dblp-" + year + "/vldb.gml")
+        graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
+        skill_freq = dict()
+        total = 0
+        skill_experts = utilities.get_skill_experts_dict(graph)
+        for skill in skill_experts:
+            if len(skill_experts[skill]) in skill_freq:  # skill with same number of experts
+                skill_freq[len(skill_experts[skill])] += 1
+            else:
+                skill_freq[len(skill_experts[skill])] = 1
+            total += len(skill_experts[skill])
+        experts_per_skill = round(total / len(skill_experts), 2)
+        for skill in skill_experts:
+            if len(skill_experts[skill]) >= experts_per_skill:
+                cs.add(skill)
+            else:
+                if len(skill_experts[skill]) <= 3:
+                    # rare_skills.add(skill)
+                    pass
+                else:
+                    cs.add(skill)  # rare skills
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
         # skills_name_id_dict = dict()
         # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
         runs = 10
         tot_tasks = 170
-        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "w").close()
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results-vldb1.txt", "w").close()
         heading = results.get_heading()
-        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt", "a").write(
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results-vldb1.txt", "a").write(
             heading + "\n")
-        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-teams.txt", "w").close()
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-teams-vldb1.txt", "w").close()
         with open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0.txt", "r") as file:
-            n_lines = utilities.get_num_lines("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0.txt")
+            n_lines = utilities.get_num_lines("../dblp-" + year + "/vldb-" + str(tot_tasks) + "-0.txt")
             crun = 0  # cu
             for line in tqdm(file, total=n_lines):
                 crun += 1
                 # task = dblp_data.get_task_from_title_graph(graph, line.strip("\n").split("\t")[1])
                 task = line.strip("\n").split()
                 # print(task)
+                if len(set(task).intersection(cs)) < len(task):
+                    # print(task)
+                    continue
                 record = ""
                 start_time = time.time()
-                team = Algorithms.tfs(graph, task)
+                team = Algorithms.tfs(graph, task, 1, 1)
                 end_time = time.time()
                 tg = team.get_team_graph(graph)
                 # show_graph(tg)
                 results.task_size += len(task)
                 results.tot_time += end_time - start_time
                 results.cardinality += team.cardinality()
-                results.radius += team.radius(tg)
+                # results.radius += team.radius(tg)
+                results.radius += 0
                 results.diameter += team.diameter(tg)
                 results.leader_distance += team.leader_distance(tg)
                 results.leader_skill_distance += team.leader_skill_distance(tg, task)
@@ -60,7 +86,7 @@ def main_run(algori):
                 # results.gini_simpson_task_diversity += team.gini_simpson_diversity(graph, False)  # task diversity
                 # results.gini_simpson_team_diversity += team.gini_simpson_diversity(graph, True)
                 open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori +
-                     "-teams.txt", "a").write(",".join(sorted(team.experts)) + "\n")
+                     "-teams-vldb1.txt", "a").write(",".join(sorted(team.experts)) + "\n")
                 if crun % runs == 0:
                     record += str(results.task_size / runs)
                     record += "\t" + str(round(results.tot_time / runs, 3))
@@ -78,7 +104,7 @@ def main_run(algori):
                     # record += "\t" + str(results.simpson_team_diversity / runs)
                     # record += "\t" + str(results.gini_simpson_task_diversity / runs)  # task diversity
                     # record += "\t" + str(results.gini_simpson_team_diversity / runs)
-                    open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results.txt",
+                    open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results-vldb1.txt",
                          "a").write(
                         record + "\n")
                     results.clean_it()

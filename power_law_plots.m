@@ -1,13 +1,14 @@
 #!/usr/bin/gnuplot -persist
 year ="2015"
-do for [network in "vldb sigmod icde icdt edbt pods www kdd sdm pkdd icdm icml ecml colt uai soda focs stoc stacs db dm ai th dblp"] {
+#pods www kdd sdm pkdd icdm icml ecml colt uai soda focs stoc stacs dm ai th dblp
+do for [network in "dblp"] {
 reset
 set terminal postscript eps enhanced color font 'Arial-Bold'
 #set title "power law property by degree of experts of ".network." network"  tc "royalblue"
 stats '../dblp-'.year.'/'.network.'-nodes.txt' u 1:2 nooutput
 set xrange [STATS_min_x/2:STATS_max_x*2]
 set yrange [STATS_min_y/2:STATS_max_y*2]
-set xlabel "Degree of expert"
+set xlabel "Degree of experts"
 set ylabel "Number of experts"
 set logscale y
 set logscale x
@@ -30,7 +31,7 @@ set terminal postscript eps enhanced color font 'Arial-Bold'
 stats '../dblp-'.year.'/'.network.'-skills-per-expert.txt' u 1:2 nooutput
 set xrange [STATS_min_x/2:STATS_max_x*2]
 set yrange [STATS_min_y/2:STATS_max_y*2]
-set xlabel "skills per expert"
+set xlabel "Skills per expert"
 set ylabel "Number of experts"
 set logscale xy
 set output './eps/'.network.'-'.year.'-skills-per-expert-pl.eps'

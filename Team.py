@@ -82,7 +82,7 @@ class Team:
             for nd in t_graph.nodes:
                 sp[nd] = nx.single_source_dijkstra_path_length(t_graph, nd)
             e = nx.eccentricity(t_graph, sp=sp)
-            return round(nx.diameter(t_graph, e), 5)
+            return round(nx.diameter(t_graph, e), 2)
 
     def radius(self, l_graph) -> float:
         """
@@ -106,7 +106,7 @@ class Team:
                 plt.show()
                 msg = "Found infinite path length because the graph is not" " connected"
                 raise nx.NetworkXError(msg) from eccent
-            return round(nx.radius(t_graph, eccent), 5)
+            return round(nx.radius(t_graph, eccent), 2)
 
     def sum_distance(self, l_graph, task) -> float:
         """
@@ -128,7 +128,7 @@ class Team:
                         if member in self.expert_skills and skill_j in self.expert_skills[member]:
                             expert_j = member
                     if expert_i in l_graph and expert_j in l_graph and nx.has_path(l_graph, expert_i, expert_j):
-                        sd += nx.dijkstra_path_length(l_graph, expert_i, expert_j, weight="weight")
+                        sd += nx.dijkstra_path_length(l_graph, expert_i, expert_j, weight="cc")
         sd /= 2
         return round(sd, 3)
 
@@ -149,7 +149,7 @@ class Team:
                 for member in self.experts:
                     if member != self.leader and skill in self.expert_skills[member]:
                         if nx.has_path(l_graph, self.leader, member):
-                            ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="weight")
+                            ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="cc")
         return round(ld, 3)
 
     def leader_distance(self, l_graph) -> float:
@@ -166,7 +166,7 @@ class Team:
             for member in self.experts:
                 if member != self.leader:
                     if nx.has_path(l_graph, self.leader, member):
-                        ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="weight")
+                        ld += nx.dijkstra_path_length(l_graph, self.leader, member, weight="cc")
         return round(ld, 3)
 
     def shannon_team_diversity(self, l_graph):

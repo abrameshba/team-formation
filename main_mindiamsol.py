@@ -15,8 +15,7 @@ def main_run(algori, mhops):
     year = "2015"
     # for network in ["db"]:
     results = main_rarestfirst.Results()
-    networks = ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml", "ecml",
-                "colt", "uai", "soda", "focs", "stoc", "stacs"]
+    networks = ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "db"]
     for network in tqdm(networks):
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
@@ -96,7 +95,7 @@ if __name__ == '__main__':
     import time
 
     begin_time = time.time()
-    main_run("mds",5)
+    main_run("mds", 5)
     # processes = []
     # for alg in ["rfs"]:
     #     p = multiprocessing.Process(target=multiprocessing_func, args=(alg,))
