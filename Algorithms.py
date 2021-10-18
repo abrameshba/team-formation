@@ -139,33 +139,33 @@ def tfs(l_graph, l_task, hops, lmbda):  # twice of average degree
             team.task.add(skill)
         task_copy.update(l_task)
         team.leader = c_node
-        # skill_cover = set(task_copy).intersection(
-        #     set(l_graph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
-        # team.experts.add(c_node)
-        # if len(skill_cover) > 0:
-        #     if c_node in team.expert_skills:
-        #         for skill in skill_cover:
-        #             team.expert_skills[c_node].append(skill)
-        #     else:
-        #         team.expert_skills[c_node] = list()
-        #         for skill in skill_cover:
-        #             team.expert_skills[c_node].append(skill)
-        # task_copy.difference_update(skill_cover)
+        skill_cover = set(task_copy).intersection(
+            set(l_graph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
+        team.experts.add(c_node)
+        if len(skill_cover) > 0:
+            if c_node in team.expert_skills:
+                for skill in skill_cover:
+                    team.expert_skills[c_node].append(skill)
+            else:
+                team.expert_skills[c_node] = list()
+                for skill in skill_cover:
+                    team.expert_skills[c_node].append(skill)
+        task_copy.difference_update(skill_cover)
         hop_nodes = utilities.within_k_nbrs(l_graph, c_node, hops)
         nbrhd = []
-        team.clean_it()
-        for skill in l_task:
-            team.task.add(skill)
-        task_copy.update(l_task)
-        team.leader = c_node
+        # team.clean_it()
+        # for skill in l_task:
+        #     team.task.add(skill)
+        # task_copy.update(l_task)
+        # team.leader = c_node
         for node in hop_nodes:
             if len(l_graph.nodes[node])>0:
                 skills = set(l_graph.nodes[node]["skills"].split(",")).intersection(task_copy)
                 if len(skills) > 0:
-                    # dis = nx.dijkstra_path_length(l_graph, c_node, node, weight="cc")
-                    # nbrhd.append([node, skills, dis])
-                    nbrhd.append([node, skills])
-        # nbrhd.sort(key=lambda elem: (-len(elem[1]), elem[2]))  # sort neighbor hood max skills and min distance
+                    dis = nx.dijkstra_path_length(l_graph, c_node, node, weight="cc")
+                    nbrhd.append([node, skills, dis])
+                    # nbrhd.append([node, skills])
+        nbrhd.sort(key=lambda elem: (-len(elem[1]), elem[2]))  # sort neighbor hood max skills and min distance
         for nbr in nbrhd:
             if len(nbr[1].intersection(task_copy)) > 0:
                 team.experts.add(nbr[0])
@@ -232,18 +232,18 @@ def tfr(l_graph, l_task, hops, lmbda):  # twice of average degree
             team.task.add(skill)
         task_copy.update(l_task)
         team.leader = c_node
-        # skill_cover = set(task_copy).intersection(
-        #     set(l_graph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
-        # team.experts.add(c_node)
-        # if len(skill_cover) > 0:
-        #     if c_node in team.expert_skills:
-        #         for skill in skill_cover:
-        #             team.expert_skills[c_node].append(skill)
-        #     else:
-        #         team.expert_skills[c_node] = list()
-        #         for skill in skill_cover:
-        #             team.expert_skills[c_node].append(skill)
-        # task_copy.difference_update(skill_cover)
+        skill_cover = set(task_copy).intersection(
+            set(l_graph.nodes[team.leader]["skills"].split(",")))  # expert skills matched with l_task
+        team.experts.add(c_node)
+        if len(skill_cover) > 0:
+            if c_node in team.expert_skills:
+                for skill in skill_cover:
+                    team.expert_skills[c_node].append(skill)
+            else:
+                team.expert_skills[c_node] = list()
+                for skill in skill_cover:
+                    team.expert_skills[c_node].append(skill)
+        task_copy.difference_update(skill_cover)
         hop_nodes = utilities.within_k_nbrs(l_graph, c_node, hops)
         nbrhd = []
         team.clean_it()
@@ -255,10 +255,10 @@ def tfr(l_graph, l_task, hops, lmbda):  # twice of average degree
             if len(l_graph.nodes[node])>0:
                 skills = set(l_graph.nodes[node]["skills"].split(",")).intersection(task_copy)
                 if len(skills) > 0:
-                    # dis = nx.dijkstra_path_length(l_graph, c_node, node, weight="cc")
-                    # nbrhd.append([node, skills, dis])
-                    nbrhd.append([node, skills])
-        # nbrhd.sort(key=lambda elem: (-len(elem[1]), elem[2]))  # sort neighbor hood max skills and min distance
+                    dis = nx.dijkstra_path_length(l_graph, c_node, node, weight="cc")
+                    nbrhd.append([node, skills, dis])
+                    # nbrhd.append([node, skills])
+        nbrhd.sort(key=lambda elem: (-len(elem[1]), elem[2]))  # sort neighbor hood max skills and min distance
         for nbr in nbrhd:
             if len(nbr[1].intersection(task_copy)) > 0:
                 team.experts.add(nbr[0])
@@ -300,7 +300,12 @@ def best_leader_distance(l_graph, l_task):
     ldr_distance = 1000
     best_team = Team()
     import math
-    for candidate in tqdm(nx.nodes(l_graph), total=nx.number_of_nodes(l_graph)):
+    avg_degree = (2 * l_graph.number_of_edges()) / float(l_graph.number_of_nodes())
+    hc = sorted([n for n, d in l_graph.degree() if len(l_graph.nodes[n]) > 0 and
+                 d >= 1 * avg_degree and
+                 len(set(l_graph.nodes[n]["skills"].split(",")).intersection(set(l_task))) > 0],
+                reverse=True)
+    for candidate in tqdm(hc, total=len(hc)):
         team = Team()
         for skill in l_task:
             team.task.add(skill)

@@ -15,7 +15,7 @@ def main_run(algori):
     year = "2015"
     # for network in ["db"]:
     results = main_rarestfirst.Results()
-    networks = ["db"]
+    networks = ["dblp"]
     # networks = ["vldb", "sigmod", "icde", "icdt", "edbt", "pods", "www", "kdd", "sdm", "pkdd", "icdm", "icml",
     #             "ecml", "colt", "uai", "soda", "focs", "stoc", "stacs", "db", "dm", "ai", "th", "dblp"]
     # , "sigmod", "icde", "icdt", "edbt", "pods"
@@ -48,13 +48,13 @@ def main_run(algori):
         # with  open("../dblp-" + year + "/" + network + "-titles.txt") as file:
         runs = 10
         tot_tasks = 170
-        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results-vldb1.txt", "w").close()
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results2.txt", "w").close()
         heading = results.get_heading()
-        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results-vldb1.txt", "a").write(
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results2.txt", "a").write(
             heading + "\n")
-        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-teams-vldb1.txt", "w").close()
+        open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-teams2.txt", "w").close()
         with open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0.txt", "r") as file:
-            n_lines = utilities.get_num_lines("../dblp-" + year + "/vldb-" + str(tot_tasks) + "-0.txt")
+            n_lines = utilities.get_num_lines("../dblp-" + year +"/" + network + "-" + str(tot_tasks) + "-0.txt")
             crun = 0  # cu
             for line in tqdm(file, total=n_lines):
                 crun += 1
@@ -66,7 +66,7 @@ def main_run(algori):
                     continue
                 record = ""
                 start_time = time.time()
-                team = Algorithms.tfs(graph, task, 1, 1)
+                team = Algorithms.tfs(graph, task, 2, 2)
                 end_time = time.time()
                 tg = team.get_team_graph(graph)
                 # show_graph(tg)
@@ -86,7 +86,7 @@ def main_run(algori):
                 # results.gini_simpson_task_diversity += team.gini_simpson_diversity(graph, False)  # task diversity
                 # results.gini_simpson_team_diversity += team.gini_simpson_diversity(graph, True)
                 open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori +
-                     "-teams-vldb1.txt", "a").write(",".join(sorted(team.experts)) + "\n")
+                     "-teams2.txt", "a").write(",".join(sorted(team.experts)) + "\n")
                 if crun % runs == 0:
                     record += str(results.task_size / runs)
                     record += "\t" + str(round(results.tot_time / runs, 3))
@@ -104,7 +104,7 @@ def main_run(algori):
                     # record += "\t" + str(results.simpson_team_diversity / runs)
                     # record += "\t" + str(results.gini_simpson_task_diversity / runs)  # task diversity
                     # record += "\t" + str(results.gini_simpson_team_diversity / runs)
-                    open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results-vldb1.txt",
+                    open("../dblp-" + year + "/" + network + "-" + str(tot_tasks) + "-0-" + algori + "-results2.txt",
                          "a").write(
                         record + "\n")
                     results.clean_it()
