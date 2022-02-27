@@ -1,7 +1,7 @@
 #!/usr/bin/gnuplot -persist
 year ="2015"
 #  sigmod icde icdt edbt pods www kdd sdm pkdd icdm icml ecml colt uai soda focs stoc stacs db
-do for [network in  "vldb"] {
+do for [network in  "dblp"] {
     reset
     #set title "Processing time (sec)" font ",14" textcolor rgbcolor "royalblue"
     set xlabel "Task Size |T|"
@@ -13,14 +13,14 @@ do for [network in  "vldb"] {
     set key box Left left
     set terminal postscript eps enhanced color
     set ylabel "Processing time (sec)"
-    set output './eps/'.network."-rand-170-processing-time.eps"
-    plot    '../dblp-'.year.'/'.network.'-170-0-mds-results.txt' using 1:2 with linespoints title "MinDiamSol",\
-            '../dblp-'.year.'/'.network.'-170-0-bld-results.txt' using 1:2 with linespoints title "MinLD",\
-            '../dblp-'.year.'/'.network.'-170-0-bsd-results.txt' using 1:2 with linespoints title "MinSD",\
-            '../dblp-'.year.'/'.network.'-170-0-rfs-results.txt' using 1:2 with linespoints title "Rarestfirst", \
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:2 with linespoints title "TPLClosest-1",\
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:2 with linespoints title "TPLClosest-2",\
-            '../dblp-'.year.'/'.network.'-170-0-tfr-results.txt' using 1:2 with linespoints title "TPLRandom"
+    set output './eps/'.network."-rand-170-processing-time1.eps"
+    splot    '../dblp-'.year.'/'.network.'-170-0-mds-results.txt' using 1:2:3 with linespoints title "MinDiamSol",\
+            '../dblp-'.year.'/'.network.'-170-0-bld-results.txt' using 1:2:3 with linespoints title "MinLD",\
+            '../dblp-'.year.'/'.network.'-170-0-bsd-results.txt' using 1:2:3 with linespoints title "MinSD",\
+            '../dblp-'.year.'/'.network.'-170-0-rfs-results.txt' using 1:2:3 with linespoints title "Rarestfirst", \
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:2:3 with linespoints title "TPLClosest1",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:2:3 with linespoints title "TPLClosest2",\
+            '../dblp-'.year.'/'.network.'-170-0-tfr-results.txt' using 1:2:3 with linespoints title "TPLRandom"
 
 
     reset
@@ -36,8 +36,8 @@ do for [network in  "vldb"] {
             '../dblp-'.year.'/'.network.'-170-0-bld-results.txt' using 1:3 with linespoints title "MinLD",\
             '../dblp-'.year.'/'.network.'-170-0-bsd-results.txt' using 1:3 with linespoints title "MinSD",\
             '../dblp-'.year.'/'.network.'-170-0-rfs-results.txt' using 1:3 with linespoints title "Rarestfirst", \
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:3 with linespoints title "TPLClosest-1",\
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:3 with linespoints title "TPLClosest-2",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:3 with linespoints title "TPLClosest1",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:3 with linespoints title "TPLClosest2",\
             '../dblp-'.year.'/'.network.'-170-0-tfr-results.txt' using 1:3 with linespoints title "TPLRandom"
     reset
     #set title "Diameter" font ",14" textcolor rgbcolor "royalblue"
@@ -52,8 +52,8 @@ do for [network in  "vldb"] {
             '../dblp-'.year.'/'.network.'-170-0-bld-results.txt' using 1:5 with linespoints title "MinLD",\
             '../dblp-'.year.'/'.network.'-170-0-bsd-results.txt' using 1:5 with linespoints title "MinSD",\
             '../dblp-'.year.'/'.network.'-170-0-rfs-results.txt' using 1:5 with linespoints title "Rarestfirst", \
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:5 with linespoints title "TPLClosest-1",\
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:5 with linespoints title "TPLClosest-2",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:5 with linespoints title "TPLClosest1",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:5 with linespoints title "TPLClosest2",\
             '../dblp-'.year.'/'.network.'-170-0-tfr-results.txt' using 1:5 with linespoints title "TPLRandom"
     reset
     #set title "Leader distance" font ",14" textcolor rgbcolor "royalblue"
@@ -68,8 +68,8 @@ do for [network in  "vldb"] {
             '../dblp-'.year.'/'.network.'-170-0-bld-results.txt' using 1:6 with linespoints title "MinLD",\
             '../dblp-'.year.'/'.network.'-170-0-bsd-results.txt' using 1:6 with linespoints title "MinSD",\
             '../dblp-'.year.'/'.network.'-170-0-rfs-results.txt' using 1:6 with linespoints title "Rarestfirst", \
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:6 with linespoints title "TPLClosest-1",\
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:6 with linespoints title "TPLClosest-2",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:6 with linespoints title "TPLClosest1",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:6 with linespoints title "TPLClosest2",\
             '../dblp-'.year.'/'.network.'-170-0-tfr-results.txt' using 1:6 with linespoints title "TPLRandom"
     reset
     #set title "Leader sum distance" font ",14" textcolor rgbcolor "royalblue"
@@ -84,8 +84,8 @@ do for [network in  "vldb"] {
             '../dblp-'.year.'/'.network.'-170-0-bld-results.txt' using 1:7 with linespoints title "MinLD",\
             '../dblp-'.year.'/'.network.'-170-0-bsd-results.txt' using 1:7 with linespoints title "MinSD",\
             '../dblp-'.year.'/'.network.'-170-0-rfs-results.txt' using 1:7 with linespoints title "Rarestfirst", \
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:7 with linespoints title "TPLClosest-1",\
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:7 with linespoints title "TPLClosest-2",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:7 with linespoints title "TPLClosest1",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:7 with linespoints title "TPLClosest2",\
             '../dblp-'.year.'/'.network.'-170-0-tfr-results.txt' using 1:7 with linespoints title "TPLRandom"
     reset
     #set title "Sum distance" font ",14" textcolor rgbcolor "royalblue"
@@ -100,7 +100,7 @@ do for [network in  "vldb"] {
             '../dblp-'.year.'/'.network.'-170-0-bld-results.txt' using 1:8 with linespoints title "MinLD",\
             '../dblp-'.year.'/'.network.'-170-0-bsd-results.txt' using 1:8 with linespoints title "MinSD",\
             '../dblp-'.year.'/'.network.'-170-0-rfs-results.txt' using 1:8 with linespoints title "Rarestfirst", \
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:8 with linespoints title "TPLClosest-1",\
-            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:8 with linespoints title "TPLClosest-2",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results1.txt' using 1:8 with linespoints title "TPLClosest1",\
+            '../dblp-'.year.'/'.network.'-170-0-tfs-results2.txt' using 1:8 with linespoints title "TPLClosest2",\
             '../dblp-'.year.'/'.network.'-170-0-tfr-results.txt' using 1:8 with linespoints title "TPLRandom"
 }

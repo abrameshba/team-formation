@@ -392,9 +392,9 @@ class DBLPData:
         rare_skills = set()
         for skill in skill_experts:
             if len(skill_experts[skill]) <= 3:
-                rare_skills.add(skill)
+                rare_skills.add(skill)  # rare skills
             else:
-                network_skills.add(skill)  # rare skills
+                network_skills.add(skill)
         for _ in range(3):
             file_list = glob.glob("../dblp-" + self.year + "/" + network + "-" + str(ntasks) + "-*.txt")
             if len(file_list) >= 3:
@@ -557,7 +557,7 @@ class DBLPData:
         record += "\t" + str(round(hcn / graph.number_of_nodes(), 2))
         record += "\t" + str(nx.diameter(graph))
         record += "\t" + str(round(nx.average_shortest_path_length(graph), 2))
-        open("../dblp-" + myear + "/stats-summary.txt", "a").write(record + "\n")
+        open("../dblp-" + myear + "/stats-summary-now.txt", "a").write(record + "\n")
 
     def generate_distributed_tasks(self, network):
         import networkx as nx
@@ -703,7 +703,7 @@ class BIBSNMData:
             title_id = 1
             title_id_name_dict = dict()
             tqdm.write("writing ../bbsnm-" + self.year + "/" + network + "-titles.txt -  titles info ")
-            open("../bbsnm-" + self.year + "/" + network + "-titles.txt", "w").close()
+            open("../bbsnm-" + self.year + "/" + network + "-titles.txt", "wdblp").close()
             for title in tqdm(titles_set, total=len(titles_set)):
                 title_id_name_dict[title_id] = title
                 open("../bbsnm-" + self.year + "/" + network + "-titles.txt", "a").write(

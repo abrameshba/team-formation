@@ -27,6 +27,7 @@ class Results:
         self.simpson_team_diversity = 0
         self.gini_simpson_task_diversity = 0  # task diversity
         self.gini_simpson_team_diversity = 0
+        self.random_experts = 0
 
     def clean_it(self):
         self.tot_time = 0
@@ -38,6 +39,7 @@ class Results:
         self.leader_skill_distance = 0
         self.sum_distance = 0
         self.shannon_task_diversity = 0
+        self.random_experts = 0
         self.shannon_team_diversity = 0
         # self.simpson_task_density = 0
         # self.simpson_team_density = 0

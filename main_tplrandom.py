@@ -15,7 +15,7 @@ def main_run(algori):
     year = "2015"
     # for network in ["db"]:
     results = main_rarestfirst.Results()
-    networks = ["icde", "icdt", "edbt", "pods", "db"]
+    networks = ["dblp"]
     for network in tqdm(networks):
         print(network)
         graph = nx.read_gml("../dblp-" + year + "/" + network + ".gml")
@@ -50,7 +50,7 @@ def main_run(algori):
                 results.leader_distance += team.leader_distance(tg)
                 results.leader_skill_distance += team.leader_skill_distance(tg, task)
                 results.sum_distance += team.sum_distance(tg, task)
-                # results.shannon_task_diversity += team.shannon_task_diversity(graph)
+                results.random_experts += len(team.random_experts)
                 # results.shannon_team_diversity += team.shannon_team_diversity(graph)
                 # results.simpson_task_diversity += team.simpson_diversity(graph, False)  # task diversity
                 # results.simpson_team_diversity += team.simpson_diversity(graph, True)
@@ -67,7 +67,7 @@ def main_run(algori):
                     record += "\t" + str(results.leader_distance / runs)
                     record += "\t" + str(results.leader_skill_distance / runs)
                     record += "\t" + str(results.sum_distance / runs)
-                    # record += "\t" + str(results.shannon_task_diversity / runs)
+                    record += "\t" + str(results.random_experts / runs)
                     # record += "\t" + str(results.shannon_team_diversity / runs)
                     # # record += "\t" + str(team.simpson_task_density(graph))
                     # # record += "\t" + str(team.simpson_team_density(graph))
